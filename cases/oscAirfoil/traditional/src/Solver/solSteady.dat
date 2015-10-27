@@ -1,0 +1,6 @@
+linearSolverType 1
+cfl 40.0
+steady 1
+sOrder 1
+tOrder 1
+maxTimeStep 1

@@ -1,0 +1,7 @@
+mesh= Grid_0/bgm.msh
+phys_count= 2
+phys= 1
+phys= 2
+bc= 0
+bc= 2
+nHoles= 0

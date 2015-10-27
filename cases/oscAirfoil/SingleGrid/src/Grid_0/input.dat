@@ -1,0 +1,8 @@
+mesh= Grid_0/NACA0012.msh
+phys_count= 3
+phys= 1
+phys= 2
+phys= 3
+bc= 0
+bc= 2
+bc= 1
