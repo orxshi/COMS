@@ -8,22 +8,6 @@ void Solver::interflux (Grid& gr)
     {
         Cell& e = gr.cell[ic];
         
-        e.sigma = 0.;
-        e.R.fill(0.);
-        eq5 (e.D, 0.);
-    }
-    
-    if (sOrder == 2) { gr.leastSquaresGrad(); }
-    
-    for (Face& f: gr.face)
-    {
-        roeflx(f, gr.cell[f.nei[0]], gr.cell[f.nei[1]]);
-    }
-    
-    for (int ic=gr.n_bou_elm; ic<gr.cell.size(); ++ic)
-    {
-        Cell& e = gr.cell[ic];
-        
         dTao = cfl * e.vol / e.sigma;
         
         switch (tOrder)
@@ -33,14 +17,14 @@ void Solver::interflux (Grid& gr)
                 {
                     for (int i=0; i<N_VAR; ++i)
                     {
-                        e.D[i][i] += e.vol / dTao;
+                        e.D(i,i) += e.vol / dTao;
                     }
                 }
                 else
                 {
                     for (int i=0; i<N_VAR; ++i)
                     {
-                        e.D[i][i] += e.vol * (1./dTao + 1./dt);
+                        e.D(i,i) += e.vol * (1./dTao + 1./dt);
                         e.R[i] -= e.vol * (e.cons[i] - e.old_cons[i]) / dt;
                     }
                 }
@@ -50,14 +34,14 @@ void Solver::interflux (Grid& gr)
                 {
                     for (int i=0; i<N_VAR; ++i)
                     {
-                        e.D[i][i] += 1.5 * e.vol / dTao;
+                        e.D(i,i) += 1.5 * e.vol / dTao;
                     }
                 }
                 else
                 {
                     for (int i=0; i<N_VAR; ++i)
                     {
-                        e.D[i][i] += 1.5 * e.vol * (1./dTao + 1./dt);
+                        e.D(i,i) += 1.5 * e.vol * (1./dTao + 1./dt);
                     }
                     
                     if (nTimeStep > 1)

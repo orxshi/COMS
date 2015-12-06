@@ -11,6 +11,12 @@ void Solver::impl (Grid& gr)
     string slash = "/";
     dir.append (slash);
     dir.append (temps);
+    int printThres = 100;
+    
+    Limiter limiter (gr);
+    
+    if (sOrder == 2) { gr.leastSquaresGrad(); }
+    roeflx (gr, limiter);
     
     for (nTimeStep=0; nTimeStep<maxTimeStep; ++nTimeStep)
     {        
@@ -42,35 +48,28 @@ void Solver::impl (Grid& gr)
         }
         
         diff_to_cons_prim (gr); // only fields
-        set_residual (gr); // only fields
+        getRes (gr, limiter); // only fields
         
         if (petsc.rank == MASTER_RANK) { outRes(gr.outputDir); }
-        //gr.apply_BCs();
-        /*for (int c=0; c<gr.n_bou_elm; ++c)
-        {
-            if (gr.cell[c].bc == BC::EMPTY)
-            {
-                gr.cell[c].prim = gr.cell[ gr.cell[c].nei[0] ].prim;
-                gr.cell[c].prim_to_cons();
-            }
-        }*/
+        gr.apply_BCs();
         
-        if (verbose && petsc.rank == MASTER_RANK)
+        if (verbose && petsc.rank == MASTER_RANK && nTimeStep%printThres==0)
         {
             cout << left << setw(10) << fixed << time;
             cout << setw(10) << nTimeStep;
-            cout << scientific << aveRes << endl;
+            cout << scientific << aveRes << endl;            
         }        
         
-        if (fabs(aveRes) < tol) { break; }        
+        if (fabs(aveRes) < tol) { break; }
+        
+        ++glo_nTimeStep;
     }
     
     for (Cell& cll: gr.cell)
     {
         cll.oldold_cons = cll.old_cons;
         cll.old_cons = cll.cons;
-    }
+    }    
     
-    glo_nTimeStep += nTimeStep;
     ++nImplicitCalls;
 }

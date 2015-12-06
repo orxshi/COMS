@@ -45,10 +45,16 @@ double Solver::setExpRes (Grid& gr)
     // calculate cll.R with updated values. updateVars should be called before this.
     //if (!steady)
     //{
-        for (Face& f: gr.face)
+        /*for (int ic=gr.n_bou_elm; ic<gr.cell.size(); ++ic)
         {
-            roeflx(f, gr.cell[f.nei[0]], gr.cell[f.nei[1]]);
-        }
+            Cell& e = gr.cell[ic];
+            
+            e.sigma = 0.;
+            e.R.fill(0.);
+            eq5 (e.D, 0.);
+        }    
+        if (sOrder == 2) { gr.leastSquaresGrad(); }*/
+        //roeflx (gr);
     //}
     
     if (tOrder == 1 || nTimeStep < 2)
@@ -69,12 +75,13 @@ double Solver::setExpRes (Grid& gr)
 
                         //res[i] = max(fabs(RHS),res[i]);
                         
-                        if (fabs(RHS) > res[i])
+                        /*if (fabs(RHS) > res[i])
                         {
                             res[i] = fabs(RHS);
-                            cc = c;
-                            
-                        }
+                            cc = c;                            
+                        }*/
+                        
+                        res[i] += pow(RHS, 2);
                     }
                 }
             }
@@ -84,13 +91,16 @@ double Solver::setExpRes (Grid& gr)
             for (int c=gr.n_bou_elm; c<gr.cell.size(); ++c)
             {
                 Cell& cll = gr.cell[c];
-
-                for (int i=0; i<N_VAR; ++i)
+                
+                if (cll.iBlank == iBlank_t::FIELD)
                 {
-                    double LHS = (cll.cons[i] - cll.old_cons[i]) * cll.vol / dt;
-                    double RHS = cll.R[i];
+                    for (int i=0; i<N_VAR; ++i)
+                    {
+                        double LHS = (cll.cons[i] - cll.old_cons[i]) * cll.vol / dt;
+                        double RHS = cll.R[i];
 
-                    res[i] += pow(LHS - RHS, 2);
+                        res[i] += pow(LHS - RHS, 2);
+                    }
                 }
             }
         }
@@ -142,12 +152,12 @@ double Solver::setExpRes (Grid& gr)
     //    }
     ///
 
-    for (int i=0; i<N_VAR; ++i)
-    {
+    //for (int i=0; i<N_VAR; ++i)
+    //{
         //resOuter[i] /= cell.size();
-        res[i] /= (gr.n_in_elm);
+        //res[i] /= (gr.n_in_elm);
         //res[i] = sqrt(res[i]);
-    }
+    //}
 
     //double averageRes = 0.;
     double averageRes = BIG_NEG_NUM;
@@ -202,10 +212,7 @@ void Solver::expl (Grid& gr)
         
         if (sOrder == 2) { gr.leastSquaresGrad(); }
         
-        for (Face& f: gr.face)
-        {
-            roeflx(f, gr.cell[f.nei[0]], gr.cell[f.nei[1]]);
-        }
+        //roeflx (gr);
          
         updateVars(gr);
         gr.apply_BCs();        

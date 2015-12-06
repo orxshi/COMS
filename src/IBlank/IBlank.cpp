@@ -1,8 +1,8 @@
 #include "../Grid/Grid.h"
+#include "IBlank.h"
 
 void Grid::CellADT::build (const Grid& gr)
 {
-    //points.resize (gr.cell.size());
     points.resize (gr.n_in_elm);
     
     for (unsigned int c=0; c<points.size(); ++c)
@@ -22,15 +22,6 @@ void Grid::CellADT::build (const Grid& gr)
                 points[c].dim[i*2]   = min (p.dim[i], points[c].dim[i*2]);
                 points[c].dim[i*2+1] = max (p.dim[i], points[c].dim[i*2+1]);
             }
-            
-            /*points[c].dim[0] = min (p.dim[0], points[c].dim[0]);
-            points[c].dim[1] = max (p.dim[0], points[c].dim[1]);
-
-            points[c].dim[2] = min (p.dim[1], points[c].dim[2]);
-            points[c].dim[3] = max (p.dim[1], points[c].dim[3]);
-
-            points[c].dim[4] = min (p.dim[2], points[c].dim[4]);
-            points[c].dim[5] = max (p.dim[2], points[c].dim[5]);*/
 
             points[c].vertices.push_back (p.dim);
         }
@@ -61,10 +52,28 @@ void Grid::setWallDistance (int phys)
     }
 }
 
-void Grid::identifyIBlank (Grid& gr)
+Iblank::Iblank ()
 {
-    #include "IBlank.h"
+    // default
+    cellCriter = cellCriter_t::WALL;
+
+    ifstream in;
+    in.open("iblank.dat");
     
+    if (in.is_open())
+    {
+        string tmps;
+        int tmpi;
+        in >> tmps; in >> tmpi;
+        
+        cellCriter = static_cast<cellCriter_t> (tmpi);
+    }
+    
+    in.close();
+}
+
+void Iblank::identify (Grid& grAct, Grid& grPas)
+{
     function<int(Cell&)> getIndex = [&] (Cell& cll)
     {
         ADT::ADTPoint vec;
@@ -86,28 +95,29 @@ void Grid::identifyIBlank (Grid& gr)
         vec.dim[3] = cnt[1];
         vec.dim[5] = cnt[2];*/        
         
-        return gr.cellADT.search (vec);
+        return grPas.cellADT.search (vec);
     };
 
-    for (int c=n_bou_elm; c<cell.size(); ++c)
+    for (int c=grAct.n_bou_elm; c<grAct.cell.size(); ++c)
     {
         int index;        
+        Cell& cll = grAct.cell[c];
         
-        if (cell[c].iBlank == iBlank_t::UNDEFINED)
+        if (cll.iBlank == iBlank_t::UNDEFINED)
         {            
-            index = getIndex (cell[c]);
+            index = getIndex (cll);
             
             if (index == -1)
             {
                 bool insideHole;
                 
-                if (gr.nHoles > 0)
+                if (grPas.nHoles > 0)
                 {
-                    for (int i=0; i<gr.nHoles; ++i)
+                    for (int i=0; i<grPas.nHoles; ++i)
                     {
                         for (int j=0; j<N_DIM; ++j)
                         {
-                            if (cell[c].cnt[j] >= gr.holes[i].min[j] && cell[c].cnt[j] <= gr.holes[i].max[j])
+                            if (cll.cnt[j] >= grPas.holes[i].min[j] && cll.cnt[j] <= grPas.holes[i].max[j])
                             {
                                 insideHole = true;
                             }
@@ -120,56 +130,56 @@ void Grid::identifyIBlank (Grid& gr)
                     }                    
                 }
                 
-                if (gr.nHoles > 0 && insideHole)
+                if (grPas.nHoles > 0 && insideHole)
                 {
-                    cell[c].iBlank = iBlank_t::HOLE;                    
+                    cll.iBlank = iBlank_t::HOLE;                    
                 }
                 else
                 {
-                    cell[c].iBlank = iBlank_t::FIELD;
+                    cll.iBlank = iBlank_t::FIELD;
                 }
             }
             else
             {
-                if (gr.cell[index].iBlank == iBlank_t::FIELD)
+                if (grPas.cell[index].iBlank == iBlank_t::FIELD)
                 {
-                    cell[c].iBlank = iBlank_t::FRINGE;
-                    cell[c].donor = &gr.cell[index];
-                    gr.cell[index].receiver.push_back (&cell[c]);
+                    cll.iBlank = iBlank_t::FRINGE;
+                    cll.donor = &grPas.cell[index];
+                    grPas.cell[index].receiver.push_back (&cll);
                 }
-                else if (gr.cell[index].iBlank == iBlank_t::FRINGE)
+                else if (grPas.cell[index].iBlank == iBlank_t::FRINGE)
                 {
-                    cell[c].iBlank = iBlank_t::FIELD;
+                    cll.iBlank = iBlank_t::FIELD;
                 }
-                else if (gr.cell[index].iBlank == iBlank_t::UNDEFINED)
+                else if (grPas.cell[index].iBlank == iBlank_t::UNDEFINED)
                 {
                     double var1;
                     double var2;
                     
-                    if (accorWallDistance)
+                    if (cellCriter == cellCriter_t::WALL)
                     {
-                        var1 = gr.cell[index].wallDistance;
-                        var2 = cell[c].wallDistance;
+                        var1 = grPas.cell[index].wallDistance;
+                        var2 = cll.wallDistance;
                     }
-                    else if (accorSize)
+                    else if (cellCriter == cellCriter_t::SIZE)
                     {
-                        var1 = gr.cell[index].vol;
-                        var2 = cell[c].vol;
+                        var1 = grPas.cell[index].vol;
+                        var2 = cll.vol;
                     }
                     
                     if (var1 < var2)
                     {
-                        cell[c].iBlank = iBlank_t::FRINGE;
-                        gr.cell[index].iBlank = iBlank_t::FIELD;
-                        cell[c].donor = &gr.cell[index];
-                        gr.cell[index].receiver.push_back (&cell[c]);
+                        cll.iBlank = iBlank_t::FRINGE;
+                        grPas.cell[index].iBlank = iBlank_t::FIELD;
+                        cll.donor = &grPas.cell[index];
+                        grPas.cell[index].receiver.push_back (&cll);
                     }
                     else
                     {
-                        cell[c].iBlank = iBlank_t::FIELD;
-                        gr.cell[index].iBlank = iBlank_t::FRINGE;
-                        gr.cell[index].donor = &cell[c];
-                        cell[c].receiver.push_back (&gr.cell[index]);
+                        cll.iBlank = iBlank_t::FIELD;
+                        grPas.cell[index].iBlank = iBlank_t::FRINGE;
+                        grPas.cell[index].donor = &cll;
+                        cll.receiver.push_back (&grPas.cell[index]);
                     }
                 }
                 else
@@ -181,75 +191,76 @@ void Grid::identifyIBlank (Grid& gr)
         }
     }
     
-    for (int c=0; c<n_bou_elm; ++c)
+    for (int c=0; c<grAct.n_bou_elm; ++c)
     {
         int index;
+        Cell& cll = grAct.cell[c];
         
-        if (cell[c].iBlank == iBlank_t::UNDEFINED)
+        if (cll.iBlank == iBlank_t::UNDEFINED)
         {
-            if (cell[c].fringeBou == fringeBou_t::YES)
+            if (cll.fringeBou == fringeBou_t::YES)
             {
-                index = getIndex (cell[c]);
+                index = getIndex (cll);
 
                 if (index == -1)
                 {
-                    cell[c].iBlank == iBlank_t::NA;
+                    cll.iBlank == iBlank_t::NA;
                 }
                 else
                 {
-                    if (gr.cell[index].iBlank == iBlank_t::FIELD)
+                    if (grPas.cell[index].iBlank == iBlank_t::FIELD)
                     {
-                        cell[c].iBlank = iBlank_t::FRINGE;
-                        cell[c].donor = &gr.cell[index];
-                        gr.cell[index].receiver.push_back (&cell[c]);
+                        cll.iBlank = iBlank_t::FRINGE;
+                        cll.donor = &grPas.cell[index];
+                        grPas.cell[index].receiver.push_back (&cll);
                     }
-                    else if (gr.cell[index].iBlank == iBlank_t::FRINGE)
+                    else if (grPas.cell[index].iBlank == iBlank_t::FRINGE)
                     {                        
-                        cell[c].iBlank = iBlank_t::FRINGE;
-                        gr.cell[index].iBlank = iBlank_t::FIELD;
+                        cll.iBlank = iBlank_t::FRINGE;
+                        grPas.cell[index].iBlank = iBlank_t::FIELD;
                         
-                        for (int r=0; r<gr.cell[index].donor->receiver.size(); ++r)
+                        for (int r=0; r<grPas.cell[index].donor->receiver.size(); ++r)
                         {
-                            if (gr.cell[index].donor->receiver[r] == &gr.cell[index])
+                            if (grPas.cell[index].donor->receiver[r] == &grPas.cell[index])
                             {
-                                gr.cell[index].donor->receiver[r] = NULL;
-                                gr.cell[index].donor->receiver.erase (gr.cell[index].donor->receiver.begin() + r);
+                                grPas.cell[index].donor->receiver[r] = NULL;
+                                grPas.cell[index].donor->receiver.erase (grPas.cell[index].donor->receiver.begin() + r);
                                 break;
                             }
                         }
                         
-                        gr.cell[index].donor = NULL;
-                        gr.cell[index].receiver.push_back (&cell[c]);
-                        cell[c].donor = &gr.cell[index];
+                        grPas.cell[index].donor = NULL;
+                        grPas.cell[index].receiver.push_back (&cll);
+                        cll.donor = &grPas.cell[index];
                         //cout << "unset situation in Grid::identifyIBlank(...)" << endl;
                         //exit(-2);
                     }
-                    else if (gr.cell[index].iBlank == iBlank_t::UNDEFINED)
+                    else if (grPas.cell[index].iBlank == iBlank_t::UNDEFINED)
                     {
-                        cell[c].iBlank = iBlank_t::FRINGE;
-                        cell[c].donor = &gr.cell[index];
-                        gr.cell[index].receiver.push_back (&cell[c]);
-                        gr.cell[index].iBlank = iBlank_t::FIELD;
+                        cll.iBlank = iBlank_t::FRINGE;
+                        cll.donor = &grPas.cell[index];
+                        grPas.cell[index].receiver.push_back (&cll);
+                        grPas.cell[index].iBlank = iBlank_t::FIELD;
                     }
                     else
                     {
                         cout << "second undefined behavior in Grid::identifyIBlank(...)" << endl;
-                        cout << "iBlank = " << static_cast<int>(gr.cell[index].iBlank) << endl;
-                        cout << "bc = " << static_cast<int>(cell[c].bc) << endl;
-                        cout << "cell[c].cnt[0] = " << cell[c].cnt[0] << endl;
-                        cout << "cell[c].cnt[1] = " << cell[c].cnt[1] << endl;
-                        cout << "cell[c].cnt[2] = " << cell[c].cnt[2] << endl;
-                        cout << "cell[c].belonging = " << cell[c].belonging << endl;
+                        cout << "iBlank = " << static_cast<int>(grPas.cell[index].iBlank) << endl;
+                        cout << "bc = " << static_cast<int>(cll.bc) << endl;
+                        cout << "cell[c].cnt[0] = " << cll.cnt[0] << endl;
+                        cout << "cell[c].cnt[1] = " << cll.cnt[1] << endl;
+                        cout << "cell[c].cnt[2] = " << cll.cnt[2] << endl;
+                        cout << "cell[c].belonging = " << cll.belonging << endl;
                         cout << "c = " << c << endl;
                         exit(-2);
                     }
                 }
             }
-            else if (cell[c].fringeBou == fringeBou_t::NO)
+            else if (cll.fringeBou == fringeBou_t::NO)
             {
-                cell[c].iBlank == iBlank_t::NA;
+                cll.iBlank == iBlank_t::NA;
             }
-            else if (cell[c].fringeBou == fringeBou_t::UNDEFINED)
+            else if (cll.fringeBou == fringeBou_t::UNDEFINED)
             {
                 cout << "undefined fringeBou_t in Grid::identifyIBlank(...)" << endl;
                 exit(-2);

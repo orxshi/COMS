@@ -29,6 +29,7 @@ struct OscAirfoil:MovingGrid
     void setAngles (const double time);
     void read (string fileName);
     void log (string fileName);
+    void interFromOldTS (Grid& curGrid, Grid& oldGrid) {} // not defined yet
 };
 
 #endif	/* OSCAIRFOIL_H */

@@ -3,4 +3,5 @@ cfl 40.0
 steady 1
 sOrder 1
 tOrder 1
-maxTimeStep 1
+maxTimeStep 10000
+tol 1e-6

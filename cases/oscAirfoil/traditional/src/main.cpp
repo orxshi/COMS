@@ -1,5 +1,6 @@
 #include <petscsys.h>
 #include "../../../../src/Grid/Grid.h"
+#include "../../../../src/IBlank/IBlank.h"
 #include "../../../../src/Output/Output.h"
 #include "../../../../src/Solid/Solid.h"
 #include "../../../../src/Coeffs/Coeffs.h"
@@ -49,21 +50,47 @@ int main(int argc, char** argv)
     grs[0].setWallDistance(3);
     grs[1].setWallDistance(2);
     
+    // build cell trees
     grs[0].cellADT.build (grs[0]);
     grs[1].cellADT.build (grs[1]);        
-    grs[0].identifyIBlank (grs[1]);
-    grs[1].identifyIBlank (grs[0]);
     
+    // hole cutting
+    Iblank iblank;
+    iblank.identify (grs[0], grs[1]);
+    iblank.identify (grs[1], grs[0]);
+    
+    grs[0].outAllVTK (0);
+    grs[1].outAllVTK (0);
+    
+    // solvers
     array<Solver,2> solver = { Solver(grs[0], "SOLVER-STEADY-AG"), Solver(grs[1], "SOLVER-STEADY-BG") };    
     solver[0].read ("Solver/solSteady.dat");
     solver[1].read ("Solver/solSteady.dat");
     
+    // moving airfoil object
     SMAirfoil sma (solver[0].dt);
     sma.read ("MovingGrid/smAirfoil.dat");
     
+    int nActiveElms = 0;
+    for (int g=0; g<grs.size(); ++g)
+    {
+        for (const Cell& cll: grs[g].cell)
+        {
+            if (cll.iBlank == iBlank_t::FIELD)
+            {
+                ++nActiveElms;
+            }
+        }
+    }
+    log (mainDir, nActiveElms, "nActiveElms", "");
+    cout << "nActiveElms = " << nActiveElms << endl;
+    
+    watchSteady.start();
     double err = BIG_POS_NUM;
-    //while (err > solver[0].tol)
-    while (false)
+    solver[0].maxTimeStep = 1;
+    solver[1].maxTimeStep = 1;
+    double oversetTol = 1e-12;
+    while (err > oversetTol)    
     {
         for (int g=0; g<grs.size(); ++g)
         {
@@ -79,6 +106,8 @@ int main(int argc, char** argv)
         
         cout << "err = " << err << endl;
     }
+    watchSteady.stop();
+    log (mainDir, watchSteady.elapsedTime, "elapsedTimeSteady", watchSteady.unit);
     
     solver[0].petsc.finalize();
     solver[1].petsc.finalize();

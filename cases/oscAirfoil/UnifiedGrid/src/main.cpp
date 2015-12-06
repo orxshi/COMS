@@ -1,5 +1,6 @@
 #include <petscsys.h>
 #include "../../../../src/Grid/Grid.h"
+#include "../../../../src/IBlank/IBlank.h"
 #include "../../../../src/Output/Output.h"
 #include "../../../../src/Solid/Solid.h"
 #include "../../../../src/Coeffs/Coeffs.h"
@@ -50,9 +51,10 @@ int main(int argc, char** argv)
     grs[1].setWallDistance(3);
     
     grs[0].cellADT.build (grs[0]);
-    grs[1].cellADT.build (grs[1]);        
-    grs[0].identifyIBlank (grs[1]);
-    grs[1].identifyIBlank (grs[0]);
+    grs[1].cellADT.build (grs[1]);
+    Iblank iBlank;
+    iBlank.identify (grs[0], grs[1]);
+    iBlank.identify (grs[1], grs[0]);
     
     //grs[0].outAllVTK (0);
     //grs[1].outAllVTK (0);

@@ -21,6 +21,7 @@ struct SMAirfoil:MovingGrid
     void moveGrid (Grid& gr) {} // no need to move
     void read (string fileName);
     void log (string fileName);
+    void interFromOldTS (Grid& curGrid, Grid& oldGrid) {} // not defined yet
 };
 
 #endif	/* STRAIGHTMOVINGAIRFOIL_H */

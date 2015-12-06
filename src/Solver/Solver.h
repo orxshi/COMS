@@ -55,8 +55,7 @@ struct Solver
     double cfl;
     double dt;
     double finalTime;
-    double tol;
-    double oversetTol;
+    double tol;    
     double time;
     double aveRes;    
     bool steady;
@@ -69,19 +68,20 @@ struct Solver
     
     Solver (Grid& gr, string instanceName);
     
-    void expl (Grid& gr);
+    void expl (Grid& gr); // don't use
     void impl (Grid& gr);
     void interflux (Grid& gr);
     void gauss_seidel (Grid& g);
     void updateVars (Grid& gr);
-    double setExpRes (Grid& gr);
+    double setExpRes (Grid& gr); // dont use
     //void preSolver(Grid& gr);
     void log (string fileName);
     void outRes (string fileName);
     void preSolverCheck(const Grid& gr);    
     void read (string fileName);
-    void set_residual (Grid& g);
+    void set_residual (Grid& g); // don't use
     void diff_to_cons_prim(Grid& g);
+    void getRes (Grid& gr, Limiter& limiter);
     
     bool cm (string s, ifstream& in);
     template <class T> void cmh (string s, string membs, T& memb, ifstream& in, bool& found) // helper fnc for cm

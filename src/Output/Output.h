@@ -37,6 +37,10 @@ template <class T> void log (string directory, T vali, string vals, string unit)
     {
         out << " "  << unit << endl;
     }
+    else
+    {
+        out << endl;
+    }
     
     out.close();
 }

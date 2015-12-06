@@ -1,6 +1,6 @@
 #include "Solver.h"
 
-inline void invertMat5(const Matrix5& A, const Vector<N_VAR>& f, Vector<N_VAR>& x)
+/*inline void invertMat5(const Matrix5& A, const Vector<N_VAR>& f, Vector<N_VAR>& x)
 {
     // perform x = inv (A)*f
 
@@ -46,7 +46,7 @@ inline void invertMat5(const Matrix5& A, const Vector<N_VAR>& f, Vector<N_VAR>& 
     x[2] = d3 - u34 * x[3] - u35 * d5;
     x[1] = d2 - u23 * x[2] - u24 * x[3] - u25 * d5;
     x[0] = d1 - u12 * x[1] - u13 * x[2] - u14 * x[3] - u15 * d5;
-}
+}*/
 
 /*inline Vector<MAT5_SIZE> mat5Vec5Mul (const Matrix5& M, const Vector<MAT5_SIZE>& V)
 {
@@ -81,21 +81,23 @@ inline void common2 (Cell& e, const vector<Face>& face, vector<Cell>& cell)
         
         if (&e == &LC)
         {
-            sum -= mat5Vec5Mul(f.M[1], cell[e.nei[i]].dQ);
+            //sum -= mat5Vec5Mul(f.M[1], cell[e.nei[i]].dQ);
+            sum -= f.M[1] % cell[e.nei[i]].dQ;
         }
         else
         {
-            sum += mat5Vec5Mul(f.M[0], cell[e.nei[i]].dQ);
+            //sum += mat5Vec5Mul(f.M[0], cell[e.nei[i]].dQ);
+            sum += f.M[0] % cell[e.nei[i]].dQ;
         }
     }
     
     sum = sum + e.R;
-    invertMat5(e.D, sum, e.dQ);
+    //invertMat5(e.D, sum, e.dQ);
 }
 
 inline void common (Cell& e, const vector<Face>& face, vector<Cell>& cell)
 {
-    invertMat5(e.D, e.R, e.dQ); // dQ = inv(D) * res
+    //invertMat5(e.D, e.R, e.dQ); // dQ = inv(D) * res
     
     Vector<N_VAR> ddQ = e.dQ - e.old_dQ;
 
@@ -108,11 +110,13 @@ inline void common (Cell& e, const vector<Face>& face, vector<Cell>& cell)
         
         if (&e == &LC)
         {
-            RC.R += mat5Vec5Mul(f.M[0], ddQ);
+            //RC.R += mat5Vec5Mul(f.M[0], ddQ);
+            RC.R += f.M[0] % ddQ;
         }
         else
         {
-            LC.R -= mat5Vec5Mul(f.M[1], ddQ);
+            //LC.R -= mat5Vec5Mul(f.M[1], ddQ);
+            LC.R -= f.M[1] % ddQ;
         }
     }
 }
@@ -136,6 +140,18 @@ void Solver::set_residual(Grid& g)
     Vector<N_VAR> res;
     //res.fill(0.);
     res.fill(BIG_NEG_NUM);
+    
+    for (int ic=g.n_bou_elm; ic<g.cell.size(); ++ic)
+    {
+        Cell& e = g.cell[ic];
+        
+        e.sigma = 0.;
+        e.R.fill(0.);
+        //eq5 (e.D, 0.);
+        e.D = 0.;
+    }    
+    if (sOrder == 2) { g.leastSquaresGrad(); }
+    //roeflx (g);
     
     for (int ic=g.n_bou_elm; ic<g.cell.size(); ++ic)
     {

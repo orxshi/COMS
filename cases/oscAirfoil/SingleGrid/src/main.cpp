@@ -32,27 +32,27 @@ int main(int argc, char** argv)
     Solver solSteady (gr, "SOLVER-STEADY");
     solSteady.read ("Solver/solSteady.dat");
     
-    //Solver solOscAirfoil (gr, "SOLVER-OSC-AIRFOIL");
-    //solOscAirfoil.read ("Solver/solOscAirfoil.dat");
+    Solver solOscAirfoil (gr, "SOLVER-OSC-AIRFOIL");
+    solOscAirfoil.read ("Solver/solOscAirfoil.dat");
 
     oscInit.read();
     oscInit.init (gr);
 
     // solve steady state
     SMAirfoil sma (solSteady.dt);
-    //OscAirfoil oa (solOscAirfoil.dt);
+    OscAirfoil oa (solOscAirfoil.dt);
     sma.read ("MovingGrid/smAirfoil.dat");
-    //oa.read ("MovingGrid/oscAirfoil.dat");
-
-    //Coeffs coeffs (gr, oscInit.rhoInf, oscInit.Mach, oa.MachAirfoil);
+    oa.read ("MovingGrid/oscAirfoil.dat");
+    
+    Coeffs coeffs (gr, oscInit.rhoInf, oscInit.pInf, oscInit.Mach, oa.MachAirfoil);
     
     sma.getAllFaceVelocities (gr);
     watchSteady.start();
     (solSteady.implicit) ? solSteady.impl(gr) : solSteady.expl(gr);
     solSteady.petsc.finalize();
-    watchSteady.stop();    
+    watchSteady.stop();
     
-    /*int countr = 0;
+    int countr = 0;
     watchOscAirfoil.start();
     
     // solve osc airfoil
@@ -68,19 +68,20 @@ int main(int argc, char** argv)
         
         ++countr;
     }
-    watchOscAirfoil.stop();*/
+    watchOscAirfoil.stop();
     
     if (rank == MASTER_RANK)
     {
         //gr.outAllTecplot();
         gr.outAllVTK (0);
-        //coeffs.out.close();
+        coeffs.out.close();
         log (mainDir, watchSteady.elapsedTime, "elapsedTimeSteady", watchSteady.unit);
-        //log (mainDir, watchOscAirfoil.elapsedTime, "elapsedTimeOscAirfoil", watchOscAirfoil.unit);
+        log (mainDir, watchOscAirfoil.elapsedTime, "elapsedTimeOscAirfoil", watchOscAirfoil.unit);
         solSteady.log (gr.logDir);
-        //solOscAirfoil.log (gr.logDir);
+        solOscAirfoil.log (gr.logDir);
         sma.log (gr.logDir);
-        //oa.log (gr.logDir);
+        oa.log (gr.logDir);
+        gr.log();
     }
     
     PetscFinalize();

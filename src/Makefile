@@ -3,7 +3,7 @@ include ${PETSC_DIR}/lib/petsc/conf/variables
 #include ${PETSC_DIR}/lib/petsc/conf/test
 INC1=${PETSC_DIR}/include
 INC2=${PETSC_DIR}/$(PETSC_ARCH)/include
-CC = g++
+CC = g++ -g
 CFLAGS = -c -std=c++11 -fpic -O3 -I$(INC1) -I$(INC2)
 LDFLAGS = -shared
 SOURCES=BoundaryConditions/BoundaryConditions.cpp\
@@ -23,7 +23,8 @@ SOURCES=BoundaryConditions/BoundaryConditions.cpp\
         Solver/Implicit.cpp\
         Solver/PreSolver.cpp\
         Solver/Output.cpp\
-	Solver/Petsc.cpp\
+        Solver/Residual.cpp\
+        Solver/Petsc.cpp\
         Vector/Vector.cpp\
         Time/Time.cpp\
         Method/Method.cpp\

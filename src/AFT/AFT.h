@@ -155,19 +155,20 @@ namespace AFT
     extern void fringeToField (Grid& gr, Grid& ogr, int crt);
     
     // Point    
-    extern bool getNewPt (Point& crP, const Point& t0, const Point& t1, int iEdge, double aveTriSize, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, vector<Edge>& edges, vector<Triangle>& triangles);
+    extern bool getNewPt (Point& crP, const Point& t0, const Point& t1, int iEdge, double s, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, vector<Edge>& edges, vector<Triangle>& triangles);
     extern bool rayCasting (const Point& p, EdgeADT& edgeADT);    
     extern void addToPointList (Point& p, vector<Point>& points, PointADT& pointADT);
     extern double getPointDistance (double r);    
     extern bool pointsNearby (const CVector& range1, const CVector& range2, PointADT& pointADT, PointADT& edgeCenterADT);
     extern bool pointExists (const Point& p, PointADT& pointADT, int& result);
-    extern void srchCandPts (FrontMember& fm, vector<Edge>& edges, vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double rho, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT);
+    extern bool srchCandPts (FrontMember& fm, vector<Edge>& edges, vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double rho, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT);
     extern void srchNearbyPts (const Point& p, const vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double rho);
     extern bool checkTwoFormingEdges (const Point& CPX, const Point& A, const Point& B, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX,
             vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points);
     extern bool checkCircumBound (const Point& CPX, const Point& A, const Point& B, double rho);    
-    extern void ptCCInter (int baseEdge, const int iCPX, int newGridId, vector <int>& edgesAddedToFront, CircleADT& circleADT, TriangleADT& triangleADT, vector<Triangle>& triangles, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points, PointADT& pointADT);
+    extern void ptCCInter (int baseEdge, const int iCPX, int newGridId, vector <int>& edgesAddedToFront, CircleADT& circleADT, TriangleADT& triangleADT, vector<Triangle>& triangles, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, vector<Point>& points, PointADT& pointADT);
     extern void eraseDeadPoints (vector<Point>& points, vector<Edge>& edges, vector<Triangle>& triangles);
+    extern double normalDisp (const CVector& vt0, const CVector& vt1, double aveTriSize);
     
     // New Grid
     extern bool faceExists (const Face& nf, const vector<Face>& face, const vector<::Point>& point, int& index);

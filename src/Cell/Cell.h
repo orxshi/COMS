@@ -52,7 +52,7 @@ struct Cell
     Vector<N_VAR> dQ, old_dQ;
     Vector<N_VAR> prim, cons, old_cons, oldold_cons;
     Vector<N_VAR> resInner, resOuter;
-    Matrix5 D;
+    Matrixd<N_VAR, N_VAR> D;
     bool trim;
     bool newlyCreated;
     bool ghost;

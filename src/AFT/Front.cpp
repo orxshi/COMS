@@ -103,7 +103,10 @@ namespace AFT
         
         while (!frontList.empty())
         {
-            bool existingPointPass = true;
+            bool existingPointPass = false;
+            bool circumBoundPass = false;
+            bool edgesPass = false;
+            bool foundCandPts = false;
             Point CPX;
             int iCPX;
         
@@ -115,20 +118,20 @@ namespace AFT
             const Point& t0 = points[ it0 ];
             const Point& t1 = points[ it1 ];
             
-            //cout << "it0 = " << it0 << endl;
-            //cout << "it1 = " << it1 << endl;
+            cout << "it0 = " << it0 << endl;
+            cout << "it1 = " << it1 << endl;
                         
             // search existing candidate points
-            srchCandPts (frontFirst, edges, points, pointADT, candPts, (2.*rho), edgeADT, edge01ADT, triangleADT);
+            foundCandPts = srchCandPts (frontFirst, edges, points, pointADT, candPts, (2.*rho), edgeADT, edge01ADT, triangleADT);
             
             if (candPts.size() == 0)
             {
                 outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
-                existingPointPass = false;
+                //existingPointPass = false;
                 //exit(-2);
             }
             
-            if (existingPointPass)
+            if (foundCandPts)
             {
                 // find Delaunay triangle
                 outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
@@ -137,20 +140,18 @@ namespace AFT
                 CPX = points[iCPX];
                 
                 // check whether forming triangle has a circumradius smaller than threshold radius
-                existingPointPass = checkCircumBound (CPX, t0, t1, rho);
+                circumBoundPass = checkCircumBound (CPX, t0, t1, rho);
+                
+                // if circumradius check passed check two forming edges intersections
+                if (circumBoundPass)
+                {
+                    edgesPass = checkTwoFormingEdges (CPX, t0, t1, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, edges, edgeADT, points);
+                }
+                
+                existingPointPass = edgesPass;
             }
             
             //cout << "iCPX = " << iCPX << endl;
-            
-            // if circumradius check passed check two forming edges intersections
-            if (existingPointPass)
-            {
-                existingPointPass = checkTwoFormingEdges (CPX, t0, t1, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, edges, edgeADT, points);
-            }
-            /*else
-            {
-                cout << "circumbound check failed" << endl;
-            }*/
             
             // construct triangle if all previous stages are passed
             if (existingPointPass)
@@ -162,7 +163,7 @@ namespace AFT
                            
                 
                            
-                /*if (triangles.size() == 199)
+                /*if (triangles.size() == 164)
                 {
                 
                 cout << "it0 = " << it0 << endl;
@@ -177,7 +178,8 @@ namespace AFT
             {
                 // get a point normal to front
                 Point crP;
-                bool gotNewPt = getNewPt (crP, t0, t1, iFrontEdge, aveTriArea, edge01ADT, triangleADT, points, edges, triangles);
+                double s = normalDisp (t0.dim, t1.dim, aveTriArea);
+                bool gotNewPt = getNewPt (crP, t0, t1, iFrontEdge, s, edge01ADT, triangleADT, points, edges, triangles);
                 
                 // no need to check circumradius for uniform grid
                 // but will be needed in future
@@ -197,7 +199,7 @@ namespace AFT
                     int iCrP = points.size() - 1;
                 
                     vector <int> edgesAddedToFront;
-                    ptCCInter (iFrontEdge, iCrP, newGridId, edgesAddedToFront, circleADT, triangleADT, triangles, frontList, edges, edgeADT, points, pointADT);
+                    ptCCInter (iFrontEdge, iCrP, newGridId, edgesAddedToFront, circleADT, triangleADT, triangles, frontList, edges, edgeADT, edge01ADT, points, pointADT);
                     
                     srchNearbyPts (crP, points, pointADT, candPts, rho);
                     candPts.push_back (iCrP);
@@ -206,6 +208,12 @@ namespace AFT
                     // survived edges are the ones that newly added to front
                     for (int e: edgesAddedToFront)
                     {
+                        /*if (e == 148)
+                        {
+                            cout << "dfgdfgdf" << endl;
+                            exit(-2);
+                        }*/
+                    
                         int it0 = edges[e].t[0];
                         int it1 = edges[e].t[1];
                         
@@ -214,12 +222,12 @@ namespace AFT
                         // check edge intersections
                         bool A_CPX_exists, B_CPX_exists;
                         int iA_CPX, iB_CPX;
-                        if (checkTwoFormingEdges (crP, points[it0], points[it1], A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, edges, edgeADT, points))            
+                        if (checkTwoFormingEdges (crP, points[it0], points[it1], A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, edges, edgeADT, points))
                         {
                             // if pass construct triangle                    
                             construct (iCrP, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0, it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, circleADT, e);
                             
-                            /*if (triangles.size() == 216)
+                            /*if (triangles.size() == 164)
                             {
                                 cout << "with new del point" << endl;
                                 cout << "it0 = " << edges[e].t[0] << endl;
@@ -235,11 +243,17 @@ namespace AFT
                     A_CPX_exists = false;
                     B_CPX_exists = false;
                     
+                    //cout << "iFrontEdge = " << iFrontEdge << endl;
+                    
+                    
+                    
                     // construct triangle if all previous stages are passed                    
                     construct (iCrP, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0,
                        it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, circleADT, iFrontEdge);
                        
-                    /*if (triangles.size() == 216)
+                       
+                       
+                    /*if (triangles.size() == 164)
                     {
                         cout << "with new base point" << endl;
                         cout << "it0 = " << it0 << endl;
@@ -252,26 +266,55 @@ namespace AFT
                 }
                 else
                 {
-                    cout << "none of the ways work in AFT::advanceFront(...)" << endl;
+                    bool chooseWorstExisPt = false;
                 
-                    cout << "it0 = " << it0 << endl;
-                    cout << "it1 = " << it1 << endl;
-                    cout << "iCPX = " << iCPX << endl;
+                    if (foundCandPts)
+                    {
+                        if (!circumBoundPass)
+                        {
+                            edgesPass = checkTwoFormingEdges (CPX, t0, t1, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, edges, edgeADT, points);
+                            
+                            if (edgesPass)
+                            {
+                                construct (iCPX, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0,
+                                           it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, circleADT, iFrontEdge);
+                                           
+                                           /*if (triangles.size() == 164)
+                    {
+                        cout << "with new base point" << endl;
+                        cout << "it0 = " << it0 << endl;
+                        cout << "it1 = " << it1 << endl;
+                        
+                        cout << "A_CPX_exists = " << A_CPX_exists << endl;
+                        cout << "B_CPX_exists = " << B_CPX_exists << endl;
+                        exit(-2);
+                    }*/
+                                           
+                                chooseWorstExisPt = true;
+                            }
+                        }                        
+                    }                    
+                
+                    if (chooseWorstExisPt == false)
+                    {
+                        cout << "none of the ways work in AFT::advanceFront(...)" << endl;
                     
-                    //eraseDeadPoints (points, edges, triangles);
-                    //eraseDeadEdges (edges, triangles, points);
-                    //eraseDeadTriangles (triangles, points, edges);
+                        cout << "it0 = " << it0 << endl;
+                        cout << "it1 = " << it1 << endl;
+                        cout << "iCPX = " << iCPX << endl;
+                        
+                        outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
 
-                    outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
-
-                    exit(-2);
+                        exit(-2);
+                    }
                 }
             }            
           
             //cout << "frontListSize = " << frontList.size() << endl;
             //cout << "triangles.size() = " << triangles.size() << endl;
+            
             //cout << "2rho = "  << 2.*rho << endl;
-            /*if (triangles.size() == 176)
+            /*if (triangles.size() == 140)
             {
                     outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
                     exit(-2);

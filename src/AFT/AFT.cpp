@@ -395,7 +395,7 @@ namespace AFT
                 {
                     pts[i] = -1;
                     i = j;
-                    //cout << "pts[i] = " << pts[i] << endl;                    
+                    //cout << "pts[i] = " << pts[i] << endl;
                     //pts.erase (pts.begin() + j);
                     //cout << "radius = " << radius << endl;
                     //cout << "mag(d) = " << mag(d) << endl;

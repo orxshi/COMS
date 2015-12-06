@@ -2,10 +2,10 @@ c = 1; // chord length
 t = 12 * c / 100; // thickness -- NACA0012
 nX = 1000; // number of 'x' points
 depth = 1; // extrusion length
-transCircleEach = 40; // 20 // 30 // 20 // 10 // 25 // 30 // 20
-transAfoilEach = 80; // 80 // 100 // 70 // 60 // 130 // 130 // 200
-major = 0.3; // 0.3 // 20
-minor = 0.8; // 0.8 // 20
+transCircleEach = 10; // 20 // 30 // 20 // 10 // 25 // 30 // 20 // 40
+transAfoilEach = 60; // 80 // 100 // 70 // 60 // 130 // 130 // 200 // 80
+major = 20; // 0.3 // 20
+minor = 20; // 0.8 // 20
 
 xInc = c / nX;
 C1 = 0.2969;

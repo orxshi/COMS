@@ -8,13 +8,14 @@
 #ifndef IBLANK_H
 #define	IBLANK_H
 
-#define accorWallDistance 1
-#if accorWallDistance == 1
-    #define accorSize 0
-#else
-    #define accorSize 1
-#endif
-
+struct Iblank
+{
+    enum cellCriter_t {WALL=0, SIZE=1};
+    cellCriter_t cellCriter;
+    
+    Iblank ();
+    void identify (Grid& grAct, Grid& grPas);
+};
 
 #endif	/* IBLANK_H */
 

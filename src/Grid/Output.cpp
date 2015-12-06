@@ -8,7 +8,6 @@ void Grid::log()
     out << "mesh file = " << meshFile << endl;
     out << "number of cells = " << n_in_elm << endl;
     out << "number of bouElms = " << n_bou_elm << endl;
-    out << "number of bouElms = " << n_bou_elm << endl;
     out << "total number of elms = " << cell.size() << endl;
     out << "id = " << id << endl;
     out << "nFaces = " << face.size() << endl;

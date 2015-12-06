@@ -118,7 +118,7 @@ namespace AFT
         }
     }
     
-    void srchCandPts (FrontMember& fm, vector<Edge>& edges, vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double rho, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT)
+    bool srchCandPts (FrontMember& fm, vector<Edge>& edges, vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double rho, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT)
     {
         int it0 = edges[fm.edge].t[0];
         int it1 = edges[fm.edge].t[1];        
@@ -149,7 +149,7 @@ namespace AFT
         if (pointADT.ids.size() == 0)
         {
             cout << "pointADT.ids.size() == 0 in AFT::srchCandPts(...)" << endl;
-            //exit(-2);
+            return false;
         }
         
         candPts.clear();
@@ -214,8 +214,10 @@ namespace AFT
         if (candPts.size() == 0)
         {
             cout << "no cand points found in AFT::srchCandPts(...)" << endl;
-            //exit(-2);
+            return false;
         }
+        
+        return true;
     }
     
     bool pointsNearby (const CVector& range1, const CVector& range2, PointADT& pointADT, PointADT& edgeCenterADT)
@@ -273,9 +275,51 @@ namespace AFT
     {
         return (0.5 * r * 1.73205080757); // weird number is tan(60)
     }
-
-    bool getNewPt (Point& crP, const Point& t0, const Point& t1, int iEdge, double aveTriSize, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, vector<Edge>& edges, vector<Triangle>& triangles)
+    
+    double normalDisp (const CVector& vt0, const CVector& vt1, double aveTriSize)
     {
+        return spacingFnc (mag(vt1 - vt0), aveTriSize);
+    }
+
+    bool getNewPt (Point& crP, const Point& t0, const Point& t1, int iEdge, double s, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, vector<Edge>& edges, vector<Triangle>& triangles)
+    {
+        // input
+        // ref. to new point
+        // t0 and t1
+        // iEdge    
+        // s
+        // edge01ADT required for ray casting
+        // triangleADT
+        // points for checkedgeintersection
+        // edges ""
+        // triangles        
+        
+        // output
+        // ref. to new point
+        // bool
+        
+        // description:
+        // given an edge consider two normal points to the edge
+        // only one point will be chosen
+        // the point is placed along the median of the edge
+        // displacement is determined by the spacing function
+        // choose a normal point
+        // check if
+        // 1. the point is inside domain
+        // 2. the point is visible to both ends of the edge
+        // 3. the triangle formed with new point intersects any triangles
+        // 4. the intersected triangle includes the edge --> if yes ignore this point
+        // if this point is suitable return this point
+        // 5. otherwise repeat the same process for the other point
+        
+        // optimization: 
+        // consider a case where both normal points are suitable
+        // but one the points intersects some triangles        
+        // it is better to choose the one which does not intersects triangles
+        // because those triangles would be removed
+        
+        // put spacing fnc outside
+    
         Point crP1, crP2;
         bool dumBool;
         int dumI;
@@ -283,7 +327,7 @@ namespace AFT
         double dx = t1.dim[0] - t0.dim[0];
         double dy = t1.dim[1] - t0.dim[1];
         double dz = 0.;
-        double length = sqrt( pow(dx,2) + pow(dy,2) + pow(dz,2) );
+        //double length = sqrt( pow(dx,2) + pow(dy,2) + pow(dz,2) );
 
         CVector normal1;
         normal1[0] = -dy;
@@ -303,19 +347,24 @@ namespace AFT
         center[1] = 0.5 * (t0.dim[1] + t1.dim[1]);
         center[2] = 0.;
         
-        double s = spacingFnc (length, aveTriSize);
+        //double s = spacingFnc (length, aveTriSize);
 
         crP1.dim = center + (s * normal1);
         crP2.dim = center + (s * normal2);
         
+        // step_1
         if (rayCasting (crP1, edge01ADT))
         {
+            // step_2a
             if (!checkEdgeIntersection (t0, crP1, edge01ADT, edges, points, dumBool, dumI))
             {
+                // step_2b
                 if (!checkEdgeIntersection (t1, crP1, edge01ADT, edges, points, dumBool, dumI))
                 {
+                    // step_3
                     if (triangleIntersectMultiple (crP1, t0, t1, triangleADT))
                     {
+                        // step_4
                         bool success = true;
                         for (int t: triangleADT.ids)
                         {
@@ -323,32 +372,21 @@ namespace AFT
                             {
                                 if (e == iEdge)
                                 {
-                                    success = false;
-                                    break;
+                                    goto checkOtherPoint;
                                 }
                             }
-                            
-                            if (!success)
-                            {
-                                break;
-                            }
                         }
-                        
-                        if (success)
-                        {
-                            crP = crP1;
-                            return true;
-                        }
-                    }                   
-                    else
-                    {
-                        crP = crP1;
-                        return true;
                     }
+                    
+                    crP = crP1;
+                    return true;
                 }
             }
         }
         
+        checkOtherPoint:
+        
+        // step_5
         if (rayCasting (crP2, edge01ADT))
         {
             if (!checkEdgeIntersection (t0, crP2, edge01ADT, edges, points, dumBool, dumI))
@@ -364,31 +402,19 @@ namespace AFT
                             {
                                 if (e == iEdge)
                                 {
-                                    success = false;
-                                    break;
+                                    goto bothPointsChecked;
                                 }
                             }
-                            
-                            if (!success)
-                            {
-                                break;
-                            }
                         }
-                        
-                        if (success)
-                        {
-                            crP = crP2;
-                            return true;
-                        }
-                    }                   
-                    else
-                    {
-                        crP = crP2;
-                        return true;
-                    }                  
+                    }
+                    
+                    crP = crP2;
+                    return true;
                 }
             }
         }
+        
+        bothPointsChecked:
         
         cout << "cannot get a proper new point in AFT::getNewPt(...)" << endl;
         return false;
@@ -439,14 +465,15 @@ namespace AFT
         }
     }
     
-    void ptCCInter (int baseEdge, const int iCPX, int newGridId, vector <int>& edgesAddedToFront, CircleADT& circleADT, TriangleADT& triangleADT, vector<Triangle>& triangles, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points, PointADT& pointADT)
+    void ptCCInter (int baseEdge, const int iCPX, int newGridId, vector <int>& edgesAddedToFront, CircleADT& circleADT, TriangleADT& triangleADT, vector<Triangle>& triangles, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, vector<Point>& points, PointADT& pointADT)
     {
         // checks if new point intersects circumcircles
         // delete corresponding triangles from triangles list and tree
         
         const Point& CPX = points[iCPX];
         
-        
+        int it0 = edges[baseEdge].t[0];
+        int it1 = edges[baseEdge].t[1];
         
         ADT::ADTPoint vecC;
 
@@ -461,6 +488,8 @@ namespace AFT
         circleADT.searchForNIntersections = true;
         circleADT.search (vecC);
         
+        triangleIntersectMultiple (points[it0], points[it1], CPX, triangleADT);
+        
         if (circleADT.ids.size() != 0)
         {
             // new point intersected at least one circumcircle            
@@ -473,24 +502,49 @@ namespace AFT
                 {
                     cout << "circleADT.ids[] = -1 which should not be in AFT::ptccInter(...)" << endl;
                     exit (-2);
+                }                
+                
+                bool baseTri = false;
+                for (int e: triangles[t].e)
+                {
+                    if (e == baseEdge)
+                    {         
+                        baseTri = true;
+                        break;
+                    }
                 }
                 
+                if (baseTri)
+                {
+                    continue;
+                }
                 
-                    bool baseTri = false;
-                    for (int e: triangles[t].e)
+                bool p_CPX_exists;                
+                bool p_CPX_inter;
+                int ip_CPX;
+                bool considerTri = false;
+                
+                p_CPX_inter = checkEdgeIntersection (points[triangles[t].p[0]], CPX, edge01ADT, edges, points, p_CPX_exists, ip_CPX);
+                
+                if (!p_CPX_inter || (p_CPX_inter && p_CPX_exists))
+                {
+                    p_CPX_inter = checkEdgeIntersection (points[triangles[t].p[1]], CPX, edge01ADT, edges, points, p_CPX_exists, ip_CPX);
+                
+                    if (!p_CPX_inter || (p_CPX_inter && p_CPX_exists))
                     {
-                        if (e == baseEdge)
-                        {         
-                            baseTri = true;
-                            break;
+                        p_CPX_inter = checkEdgeIntersection (points[triangles[t].p[2]], CPX, edge01ADT, edges, points, p_CPX_exists, ip_CPX);
+                    
+                        if (!p_CPX_inter || (p_CPX_inter && p_CPX_exists))
+                        {
+                            considerTri = true;
                         }
                     }
-                    
-                    if (baseTri)
-                    {
-                        continue;
-                    }
+                }
                 
+                if (considerTri == false)
+                {
+                    continue;
+                }
             
                 // check neighbors via edges
                 for (int e: triangles[t].e)
@@ -627,7 +681,154 @@ namespace AFT
                 // remove circle from circleADT
                 success = circleADT.removeViaID (t);
                 if (!success) {cout << "could not remove from circleADT in AFT::ptCCInter(...)" << endl; exit (-2);}
+                for (int i=0; i<triangleADT.ids.size(); ++i)
+                {
+                    if (triangleADT.ids[i] == t)
+                    {
+                        triangleADT.ids.erase (triangleADT.ids.begin() + i);
+                        break;
+                    }
+                }
             }
+        }        
+        
+        for (int t: triangleADT.ids)
+        {
+            // check neighbors via edges
+            for (int e: triangles[t].e)
+            {   
+                if (edges[e].alive)
+                {                
+                    // if triangle has no neighbor on this edge
+                    if (edges[e].nei.size() == 1)
+                    {
+                        // kill the edge
+                        edges[e].alive = false;
+                        // remove edge from edgeADT
+                        
+                        bool success = edgeADT.removeViaID (e);
+                        
+                        if (!success)
+                        {
+                            cout << "could not remove from edgeADT 1 in AFT::ptCCInter(...)" << endl;
+                            cout << "e = " << e << endl;
+                            cout << "t = " << t << endl;
+                            cout << "triangles[t].e[0] = " << triangles[t].e[0] << endl;
+                            cout << "triangles[t].e[1] = " << triangles[t].e[1] << endl;
+                            cout << "triangles[t].e[2] = " << triangles[t].e[2] << endl;
+                            cout << "triangles[t].p[0] = " << triangles[t].p[0] << endl;
+                            cout << "triangles[t].p[1] = " << triangles[t].p[1] << endl;
+                            cout << "triangles[t].p[2] = " << triangles[t].p[2] << endl;
+                            cout << "edges[e].t[0] = " << edges[e].t[0] << endl;
+                            cout << "edges[e].t[1] = " << edges[e].t[1] << endl;
+                            exit (-2);
+                        }
+                        // remove the edge from front list
+                        eraseFromFrontList (frontList, e);
+                        /*for (int fr=0; fr<frontList.size(); ++fr)
+                        {
+                            if (frontList[fr].edge == e)
+                            {
+                                frontList.erase (frontList.begin() + fr);
+                                break;
+                            }
+                        }*/                           
+                        
+                        // notify correspoding points about the killing of edge
+                        points[edges[e].t[0]].eraseParentEdge (e);
+                        points[edges[e].t[1]].eraseParentEdge (e);
+                        
+                        
+                    }
+                    else if (edges[e].nei.size() == 2)
+                    {
+                        // find neighbor
+                        for (int n: edges[e].nei)
+                        {                           
+                            if (n != t)
+                            {
+                                bool removeNeiToo = false;
+                            
+                                for (int tt: circleADT.ids)
+                                {
+                                    if (tt == -1)
+                                    {
+                                        cout << "circleADT.ids[] = -1 which should not be in AFT::ptccInter(...)" << endl;
+                                        exit (-2);
+                                    }
+                                
+                                    // if triangle has a neighbor which is also going to be removed
+                                    if (tt == n)
+                                    {
+                                        removeNeiToo = true;
+                                        // kill the edge
+                                        edges[e].alive = false;
+                                        // remove edge from edgeADT
+                                        bool success = edgeADT.removeViaID (e);
+                                        if (!success) {cout << "could not remove from edgeADT 2 in AFT::ptCCInter(...)" << endl; exit (-2);}
+                                        // notify correspoding points about the killing of edge
+                                        points[edges[e].t[0]].eraseParentEdge (e);
+                                        points[edges[e].t[1]].eraseParentEdge (e);
+                                        
+                                        
+                                        
+                                        break;
+                                    }
+                                }
+                                
+                                // update neighbour of edge                                        
+                                for (int nn=0; nn<edges[e].nei.size(); ++nn)
+                                {
+                                    if (edges[e].nei[nn] == t)
+                                    {
+                                        edges[e].nei.erase (edges[e].nei.begin() + nn);
+                                        break;
+                                    }
+                                }
+                                
+                                if (edges[e].nei.size() >= 2)
+                                {
+                                    cout << "edges[e].nei.size() >= 2 in AFT::ptCCInter(...)" << endl;
+                                    cout << "edges[e].nei.size() = " << edges[e].nei.size() << endl;
+                                    exit (-2);
+                                }
+                                
+                                // if triangle has a neighbor which is NOT going to be removed
+                                if (!removeNeiToo)
+                                {
+                                    // add edge to front list
+                                    addToFrontList (e, frontList, points, edges);
+                                    edgesAddedToFront.push_back (e);
+                                }
+                                
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        cout << "undefined situation in AFT::ptCCInter(...)" << endl;
+                        exit (-2);
+                    }
+                }
+            }
+            
+            // kill the triangle
+            triangles[t].alive = false;
+            // remove triangle from triangleADT
+            bool success = triangleADT.removeViaID (t);
+            if (!success) {cout << "could not remove from triangleADT in AFT::ptCCInter(...)" << endl; exit (-2);}
+            // notify correspoding points about the killing of triangle
+            points[triangles[t].p[0]].eraseParentTri (t);
+            points[triangles[t].p[1]].eraseParentTri (t);
+            points[triangles[t].p[2]].eraseParentTri (t);
+            // notify correspoding edges about the killing of triangle
+            edges[triangles[t].e[0]].eraseParentTri (t);
+            edges[triangles[t].e[1]].eraseParentTri (t);
+            edges[triangles[t].e[2]].eraseParentTri (t);
+            // remove circle from circleADT
+            success = circleADT.removeViaID (t);
+            if (!success) {cout << "could not remove from circleADT in AFT::ptCCInter(...)" << endl; exit (-2);}
         }
         
         // kill unwanted points and remove them from trees
@@ -639,11 +840,7 @@ namespace AFT
             {
                 points[p].alive = false;
                 bool success = pointADT.removeViaID (p);
-                if (p == 231)
-                {
-                    cout << "killing point 231" << endl;
-                    exit(-2);
-                }
+                
                 if (!success) {cout << "could not remove from pointADT in AFT::ptCCInter(...)" << endl; exit (-2);}
             }
         }

@@ -54,7 +54,7 @@ void Solver::Petsc::solveAxb (Grid& gr)
         {
             for (int w=0; w<bs; ++w)
             {
-                v[q*bs+w] = cll.D[q][w];
+                v[q*bs+w] = cll.D(q,w);
             }
         }
         
@@ -73,7 +73,7 @@ void Solver::Petsc::solveAxb (Grid& gr)
                     {
                         for (int w=0; w<bs; ++w)
                         {
-                            v[q*bs+w] = f.M[1][q][w];
+                            v[q*bs+w] = f.M[1](q,w);
                         }
                     }
                 }
@@ -83,7 +83,7 @@ void Solver::Petsc::solveAxb (Grid& gr)
                     {
                         for (int w=0; w<bs; ++w)
                         {
-                            v[q*bs+w] = -f.M[0][q][w];
+                            v[q*bs+w] = -f.M[0](q,w);
                         }
                     }
                 }
@@ -93,7 +93,8 @@ void Solver::Petsc::solveAxb (Grid& gr)
         }
     }
     
-    /*// set values of A
+    /*
+    // set values of A
     for (PetscInt gp=first; gp<last; ++gp)
     {
         PetscInt brow = static_cast <int> (floor(gp/bs));

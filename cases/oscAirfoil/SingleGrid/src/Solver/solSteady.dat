@@ -1,5 +1,5 @@
 linearSolverType 2
-cfl 40.0
+cfl 20.0
 steady 1
 sOrder 2
 tOrder 1
