@@ -1,5 +1,80 @@
 #include "Roe.h"
 
+Roe::Roe (Grid& gr)
+{
+    vel.resize (gr.face.size());
+    flux.resize (gr.face.size());
+    //M0.resize (gr.face.size());
+    //M1.resize (gr.face.size());
+
+    initParallelVars (gr);
+}
+
+void Roe::initParallelVars (Grid& gr)
+{
+    MPI_Comm_rank (MPI_COMM_WORLD, &rank);
+    MPI_Comm_size (MPI_COMM_WORLD, &nProcs);
+    
+    localSizesFace  = new int [nProcs];
+    displsFace = new int [nProcs];
+    localSizesFaceM = new int [nProcs];
+    displsFaceM = new int [nProcs];
+    localSizesFaceF = new int [nProcs];
+    displsFaceF = new int [nProcs];
+    localSizesFaceV = new int [nProcs];
+    displsFaceV = new int [nProcs];
+
+    int rem;
+
+    // get localSizeFace
+    rem = gr.face.size() % nProcs;
+    
+    //if (rem != 0)
+    //{        
+        localSizeFace = (gr.face.size() - rem) / nProcs;
+    //}
+    
+    if (rank == nProcs-1)
+    {
+        localSizeFace += rem;
+    }
+    
+    // get localSizeFaceM, F, V
+    localSizeFaceM = localSizeFace * N_VAR * N_VAR;
+    localSizeFaceF = localSizeFace * N_VAR;
+    localSizeFaceV = localSizeFace;
+    
+    // gather localSizesFace and localSizesFaceM, F, V
+    MPI_Allgather (&localSizeFace,  1, MPI_INT, localSizesFace,  1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Allgather (&localSizeFaceM, 1, MPI_INT, localSizesFaceM, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Allgather (&localSizeFaceF, 1, MPI_INT, localSizesFaceF, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Allgather (&localSizeFaceV, 1, MPI_INT, localSizesFaceV, 1, MPI_INT, MPI_COMM_WORLD);
+    
+    displsFace[0] = 0;
+    for (int i=1; i<nProcs; ++i)
+    {
+        displsFace[i] = displsFace[i-1] + localSizesFace[i-1];
+    }
+    
+    displsFaceM[0] = 0;
+    for (int i=1; i<nProcs; ++i)
+    {
+        displsFaceM[i] = displsFaceM[i-1] + localSizesFaceM[i-1];
+    }
+    
+    displsFaceF[0] = 0;
+    for (int i=1; i<nProcs; ++i)
+    {
+        displsFaceF[i] = displsFaceF[i-1] + localSizesFaceF[i-1];
+    }
+    
+    displsFaceV[0] = 0;
+    for (int i=1; i<nProcs; ++i)
+    {
+        displsFaceV[i] = displsFaceV[i-1] + localSizesFaceV[i-1];
+    }
+}
+
 Matrixd<N_VAR,N_VAR> jacob(const Vector<N_VAR>& q, const CVector& n, double vbn)
 {
     Matrixd<N_VAR,N_VAR> A;
@@ -63,9 +138,17 @@ void setStates(Vector<N_VAR>& primL, Vector<N_VAR>& consL, Vector<N_VAR>& primR,
     
     //limiter.getLimitedGradDarwish (LC.grad, RC.grad, rL, rR, LC.prim, RC.prim, primL, primR);
     
+    for (int i=0; i<N_VAR; ++i)
+            {
+                primL[i] = LC.prim[i];
+            }
+            for (int i=0; i<N_VAR; ++i)
+            {
+                primR[i] = RC.prim[i];
+            }
     
     
-    if (limiter.type == 3)
+    /*if (limiter.type == 3)
     {
         if (iLC >= gr.n_bou_elm)
         {
@@ -96,7 +179,7 @@ void setStates(Vector<N_VAR>& primL, Vector<N_VAR>& consL, Vector<N_VAR>& primR,
                 primR[i] = RC.prim[i];
             }
         }
-    }
+    }*/
     
     /*for (int i=0; i<N_VAR; ++i)
     {
@@ -141,10 +224,8 @@ void setStates(Vector<N_VAR>& primL, Vector<N_VAR>& consL, Vector<N_VAR>& primR,
     consR[4] = primR[0] * (k + ie);
 }
 
-void roeflx (Grid& gr, Limiter& limiter)
+void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0, vector <Matrixd<N_VAR,N_VAR>>& M1)
 {
-    int rank;
-    int nProcs;
     int inc;
     int first;
     int last;
@@ -163,14 +244,14 @@ void roeflx (Grid& gr, Limiter& limiter)
     double nx, ny, nz;
     double lx, ly, lz;
     double mx, my, mz;
-    double vel;
+    //double vel;
     double asq;    
     Vector<N_VAR> LdU;    
     Vector<N_VAR> ws;
     Vector<N_VAR> diss;
     Vector<N_VAR> fluxL;
     Vector<N_VAR> fluxR;
-    Vector<N_VAR> flux;
+    //Vector<N_VAR> flux;
     Vector<N_VAR> primL;
     Vector<N_VAR> consL;
     Vector<N_VAR> primR;
@@ -211,8 +292,8 @@ void roeflx (Grid& gr, Limiter& limiter)
         //eq5 (e.D, 0.);
     }    
     
-    // parallel
-    limiter.bj (gr);
+    // serial
+    limiter.venka (gr);
     
     /*inc = gr.face.size() / nProcs;
     first = rank * inc;
@@ -221,9 +302,24 @@ void roeflx (Grid& gr, Limiter& limiter)
     // parallel
     //for (int iFace=first; iFace<last; ++iFace)
     //for (int iFace=0; iFace<gr.face.size(); ++iFace)
-    for (Face& face: gr.face)
+    
+    /*if (rank == 0)
     {
-        //Face& face = gr.face[iFace];
+    
+        cout << displsFaceV[0] << endl;
+        cout << displsFaceV[1] << endl;
+        cout << localSizesFaceV[0] << endl;
+        cout << localSizesFaceV[1] << endl;
+        cout << gr.face.size() << endl;
+        
+        exit(-2);
+        }*/
+    
+    
+    for (int iFace=displsFace[rank]; iFace<displsFace[rank]+localSizeFace; ++iFace)    
+    //for (Face& face: gr.face)
+    {
+        Face& face = gr.face[iFace];
     
         int iLC = face.nei[0];
         int iRC = face.nei[1];
@@ -418,10 +514,10 @@ void roeflx (Grid& gr, Limiter& limiter)
             // Numerical flux
             for (int i=0; i<N_VAR; ++i)
             {
-                flux[i] = 0.5 * (fluxL[i] + fluxR[i] - diss[i]) * mg;
+                flux[iFace][i] = 0.5 * (fluxL[i] + fluxR[i] - diss[i]) * mg;
             }
 
-            vel = fabs(qn-vb) + a;
+            vel[iFace] = fabs(qn-vb) + a;
             
             //-------------------------------------------------------------
             
@@ -548,42 +644,42 @@ void roeflx (Grid& gr, Limiter& limiter)
 
             // left and right matrices
             //face.M[0] = add5(JL, Aroe); // AL = JL + Aroe
-            face.M[0] = JL + Aroe;
+            M0[iFace] = JL + Aroe;
             //face.M[1] = sub5(JR, Aroe); // AR = JR - Aroe
-            face.M[1] = JR - Aroe;
+            M1[iFace] = JR - Aroe;
             
             //face.M[0] = mulS5 (0.5*mg, face.M[0]);
-            face.M[0] = face.M[0] * 0.5 * mg;
+            M0[iFace] = M0[iFace] * 0.5 * mg;
             //face.M[1] = mulS5 (0.5*mg, face.M[1]);
-            face.M[1] = face.M[1] * 0.5 * mg;
+            M1[iFace] = M1[iFace] * 0.5 * mg;
         }
         else if (bc == BC::SLIP_WALL)
         {
-            flux[0] = rhoR * (qnR - vb);
-            flux[1] = rhoR * (qnR - vb) * uR + pR*nx;
-            flux[2] = rhoR * (qnR - vb) * vR + pR*ny;
-            flux[3] = rhoR * (qnR - vb) * wR + pR*nz;
-            flux[4] = (qnR - vb) * ER + qnR * pR;
+            flux[iFace][0] = rhoR * (qnR - vb);
+            flux[iFace][1] = rhoR * (qnR - vb) * uR + pR*nx;
+            flux[iFace][2] = rhoR * (qnR - vb) * vR + pR*ny;
+            flux[iFace][3] = rhoR * (qnR - vb) * wR + pR*nz;
+            flux[iFace][4] = (qnR - vb) * ER + qnR * pR;
 
-            flux[0] *= mg;
-            flux[1] *= mg;
-            flux[2] *= mg;
-            flux[3] *= mg;
-            flux[4] *= mg;
+            flux[iFace][0] *= mg;
+            flux[iFace][1] *= mg;
+            flux[iFace][2] *= mg;
+            flux[iFace][3] *= mg;
+            flux[iFace][4] *= mg;
 
-            vel = fabs(qnR-vb) + aR;
+            vel[iFace] = fabs(qnR-vb) + aR;
             
             //-----------------------------------------------
             
-            face.M[0] = jacob(consL, n, vb);
-            face.M[1] = jacob(consR, n, vb);
+            M0[iFace] = jacob(consL, n, vb);
+            M1[iFace] = jacob(consR, n, vb);
             /*face.M[0] = jacob(LC.cons, n, vb);
             face.M[1] = jacob(RC.cons, n, vb);*/
             
             //face.M[0] = mulS5 (mg, face.M[0]);
-            face.M[0] = face.M[0] * mg ;
+            M0[iFace] = M0[iFace] * mg ;
             //face.M[1] = mulS5 (mg, face.M[1]);
-            face.M[1] = face.M[1] * mg;
+            M1[iFace] = M1[iFace] * mg;
             
             //Vector2D <N_VAR,N_VAR> M;
             Matrixd <N_VAR,N_VAR> M;
@@ -619,44 +715,85 @@ void roeflx (Grid& gr, Limiter& limiter)
             M(4,4) = 1.;
             
             //face.M[0] = add5 ( mul5 (face.M[1], M), face.M[0] );
-            face.M[0] = (face.M[1] * M) + face.M[0];
+            M0[iFace] = (M1[iFace] * M) + M0[iFace];
         }
         else if (bc == BC::EMPTY)
         {
-            flux[0] = rhoR * (qnR - vb);
-            flux[1] = rhoR * (qnR - vb) * uR + pR*nx;
-            flux[2] = rhoR * (qnR - vb) * vR + pR*ny;
-            flux[3] = rhoR * (qnR - vb) * wR + pR*nz;
-            flux[4] = (qnR - vb) * ER + qnR * pR;
+            flux[iFace][0] = rhoR * (qnR - vb);
+            flux[iFace][1] = rhoR * (qnR - vb) * uR + pR*nx;
+            flux[iFace][2] = rhoR * (qnR - vb) * vR + pR*ny;
+            flux[iFace][3] = rhoR * (qnR - vb) * wR + pR*nz;
+            flux[iFace][4] = (qnR - vb) * ER + qnR * pR;
 
-            flux[0] *= mg;
-            flux[1] *= mg;
-            flux[2] *= mg;
-            flux[3] *= mg;
-            flux[4] *= mg;
+            flux[iFace][0] *= mg;
+            flux[iFace][1] *= mg;
+            flux[iFace][2] *= mg;
+            flux[iFace][3] *= mg;
+            flux[iFace][4] *= mg;
 
-            vel = fabs(qnR-vb) + aR;
+            vel[iFace] = fabs(qnR-vb) + aR;
             
             //-----------------------------------------------
             
-            face.M[0] = jacob(consL, n, vb);
+            M0[iFace] = jacob(consL, n, vb);
             //face.M[0] = jacob(LC.cons, n, vb);
             //face.M[0] = mulS5 (2.*mg, face.M[0]);
-            face.M[0] = face.M[0] * 2. * mg;
+            M0[iFace] = M0[iFace] * 2. * mg;
         }
         
-        for (int i=0; i<N_VAR; ++i)
+        /*for (int i=0; i<N_VAR; ++i)
         {
-            LC.R[i] -= flux[i];
-            RC.R[i] += flux[i];
+            LC.R[i] -= flux[iFace][i];
+            RC.R[i] += flux[iFace][i];
+        }*/
+        
+        //LC.sigma += mg * vel[iFace];
+        //RC.sigma += mg * vel[iFace];
+        
+        //LC.D = LC.D + M0[iFace];        
+        //RC.D = RC.D - M1[iFace];
+    }
+    
+    // gather face.M, vel, flux
+    MPI_Allgatherv (MPI_IN_PLACE, localSizesFaceM[rank], MPI_DOUBLE, &M0[0](0,0), localSizesFaceM, displsFaceM, MPI_DOUBLE, MPI_COMM_WORLD);
+    MPI_Allgatherv (MPI_IN_PLACE, localSizesFaceM[rank], MPI_DOUBLE, &M1[0](0,0), localSizesFaceM, displsFaceM, MPI_DOUBLE, MPI_COMM_WORLD);
+    MPI_Allgatherv (MPI_IN_PLACE, localSizesFaceV[rank], MPI_DOUBLE, &vel[0],     localSizesFaceV, displsFaceV, MPI_DOUBLE, MPI_COMM_WORLD);
+    MPI_Allgatherv (MPI_IN_PLACE, localSizesFaceF[rank], MPI_DOUBLE, &flux[0][0], localSizesFaceF, displsFaceF, MPI_DOUBLE, MPI_COMM_WORLD);
+    
+    // boundary cell are not important
+    for (int ic=gr.n_bou_elm; ic<gr.cell.size(); ++ic)
+    {
+        Cell& cll = gr.cell[ic];
+        
+        for (int f: cll.face)
+        {
+            Face& fc = gr.face[f];
+            
+            cll.sigma += mag(fc.area) * vel[f];
+            
+            if (ic == fc.nei[0])
+            {
+                for (int i=0; i<N_VAR; ++i)
+                {
+                    cll.R[i] -= flux[f][i];                    
+                }                
+                
+                cll.D = cll.D + M0[f];
+            }
+            else if (ic == fc.nei[1])
+            {
+                for (int i=0; i<N_VAR; ++i)
+                {
+                    cll.R[i] += flux[f][i];                    
+                }                
+                
+                cll.D = cll.D - M1[f];
+            }
+            else
+            {
+                cout << "neither LC nor RC in roeflx" << endl;
+                exit(-2);
+            }
         }
-        
-        LC.sigma += mg * vel;
-        RC.sigma += mg * vel;    
-        
-        //LC.D = add5(LC.D, face.M[0]);
-        LC.D = LC.D + face.M[0];
-        //RC.D = sub5(RC.D, face.M[1]);
-        RC.D = RC.D - face.M[1];
     }
 }

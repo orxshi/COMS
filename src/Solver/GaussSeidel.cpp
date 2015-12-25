@@ -82,12 +82,12 @@ inline void common2 (Cell& e, const vector<Face>& face, vector<Cell>& cell)
         if (&e == &LC)
         {
             //sum -= mat5Vec5Mul(f.M[1], cell[e.nei[i]].dQ);
-            sum -= f.M[1] % cell[e.nei[i]].dQ;
+            //sum -= f.M[1] % cell[e.nei[i]].dQ;
         }
         else
         {
             //sum += mat5Vec5Mul(f.M[0], cell[e.nei[i]].dQ);
-            sum += f.M[0] % cell[e.nei[i]].dQ;
+            //sum += f.M[0] % cell[e.nei[i]].dQ;
         }
     }
     
@@ -111,12 +111,12 @@ inline void common (Cell& e, const vector<Face>& face, vector<Cell>& cell)
         if (&e == &LC)
         {
             //RC.R += mat5Vec5Mul(f.M[0], ddQ);
-            RC.R += f.M[0] % ddQ;
+            //RC.R += f.M[0] % ddQ;
         }
         else
         {
             //LC.R -= mat5Vec5Mul(f.M[1], ddQ);
-            LC.R -= f.M[1] % ddQ;
+            //LC.R -= f.M[1] % ddQ;
         }
     }
 }

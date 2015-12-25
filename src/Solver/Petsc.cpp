@@ -1,7 +1,13 @@
 #include "Solver.h"
 
-void Solver::Petsc::solveAxb (Grid& gr)
+void Solver::Petsc::solveAxb (Grid& gr, vector <Matrixd<N_VAR,N_VAR>>& M0, vector <Matrixd<N_VAR,N_VAR>>& M1)
 {
+    int rank, nProcs;
+
+    MPI_Comm world = MPI_COMM_WORLD;
+    MPI_Comm_rank (MPI_COMM_WORLD, &rank);
+    MPI_Comm_size (MPI_COMM_WORLD, &nProcs);
+
     // set values of b
     int ind[vecLocalSize];
     double val[vecLocalSize];
@@ -73,7 +79,7 @@ void Solver::Petsc::solveAxb (Grid& gr)
                     {
                         for (int w=0; w<bs; ++w)
                         {
-                            v[q*bs+w] = f.M[1](q,w);
+                            v[q*bs+w] = M1[cll.face[nn]](q,w);
                         }
                     }
                 }
@@ -83,7 +89,7 @@ void Solver::Petsc::solveAxb (Grid& gr)
                     {
                         for (int w=0; w<bs; ++w)
                         {
-                            v[q*bs+w] = -f.M[0](q,w);
+                            v[q*bs+w] = -M0[cll.face[nn]](q,w);
                         }
                     }
                 }

@@ -33,6 +33,12 @@ struct Limiter
     vector<vector<double>> ksiBJ;
     vector<vector<double>> ksiV;
     
+    int rank;
+    int nProcs;
+    int localSize;
+    int* localSizes;
+    int* displs;
+    
     Limiter (Grid& gr);
     
     void getLimitedGrad (const Vector2D<3,N_VAR>& gradL, const Vector2D<3,N_VAR>& gradR, Vector2D<3,N_VAR>& grad); // not verified
@@ -40,6 +46,7 @@ struct Limiter
                                 const Vector<N_VAR>& varL, const Vector<N_VAR>& varR, Vector<N_VAR>& reconstL, Vector<N_VAR>& reconstR); // includes minmod only
     void bj (Grid& gr);
     void venka (Grid& gr);
+    void initParallelVars (Grid& gr);
 };
 
 #endif	/* LIMITER_H */

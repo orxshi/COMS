@@ -22,6 +22,41 @@ Limiter::Limiter (Grid& gr)
             ksiV[i].resize(N_VAR);
         }
     }
+    
+    initParallelVars (gr);
+}
+
+void Limiter::initParallelVars (Grid& gr)
+{
+    MPI_Comm_rank (MPI_COMM_WORLD, &rank);
+    MPI_Comm_size (MPI_COMM_WORLD, &nProcs);
+    
+    localSizes  = new int [nProcs];
+    displs = new int [nProcs];
+
+    int rem;
+
+    // get localSizeFace
+    rem = gr.n_in_elm % nProcs;
+    
+    //if (rem != 0)
+    //{        
+        localSize = (gr.n_in_elm - rem) / nProcs;
+    //}
+    
+    if (rank == nProcs-1)
+    {
+        localSize += rem;
+    }
+    
+    // gather localSizesFace and localSizesFaceM, F, V
+    MPI_Allgather (&localSize, 1, MPI_INT, localSizes, 1, MPI_INT, MPI_COMM_WORLD);    
+    
+    displs[0] = gr.n_bou_elm;
+    for (int i=1; i<nProcs; ++i)
+    {
+        displs[i] = displs[i-1] + localSizes[i-1];
+    }
 }
 
 void Limiter::getLimitedGrad (const Vector2D<3,N_VAR>& gradL, const Vector2D<3,N_VAR>& gradR, Vector2D<3,N_VAR>& grad)
@@ -191,11 +226,7 @@ void Limiter::bj (Grid& gr)
 
 void Limiter::venka (Grid& gr)
 {    
-    int rank;
-    int nProcs;
-    int inc;
-    int first;
-    int last;
+    
 
     auto phi = [&] (double x, double eps)
     {
@@ -204,18 +235,10 @@ void Limiter::venka (Grid& gr)
 
     Vector<N_VAR> ksiF;
     int icc;
-    double K = 0.3;    
+    double K = 0.3;
     
-    /*MPI_Comm world = MPI_COMM_WORLD;
-    MPI_Comm_rank (world, &rank);
-    MPI_Comm_size (world, &nProcs);
-    
-    inc = gr.n_in_elm / nProcs;
-    first = gr.n_bou_elm + rank * inc;
-    last = first + inc;*/
-    
-    //for (int ic=first; ic<last; ++ic)
-    for (int ic=gr.n_bou_elm; ic<gr.cell.size(); ++ic)
+    //for (int ic=gr.n_bou_elm; ic<gr.cell.size(); ++ic)
+    for (int ic=displs[rank]; ic<displs[rank]+localSize; ++ic)
     {
         Cell& cll = gr.cell[ic];
         icc = ic - gr.n_bou_elm;
@@ -264,6 +287,8 @@ void Limiter::venka (Grid& gr)
             }
         }
     }
+    
+    MPI_Allgatherv (MPI_IN_PLACE, localSizes[rank], MPI_DOUBLE, &ksiV[0][0], localSizes, displs, MPI_DOUBLE, MPI_COMM_WORLD);
 }
 
 void minMod(const Vector2D<3,N_VAR>& gradL, const Vector2D<3,N_VAR>& gradR, Vector2D<3,N_VAR>& grad)

@@ -1,6 +1,6 @@
 #include "Solver.h"
 
-Solver::Solver (Grid& gr, string instanceName) : petsc(gr)
+Solver::Solver (Grid& gr, string instanceName) : petsc(gr), roe(gr)
 {
     //default    
     tOrder = 2;
@@ -21,13 +21,21 @@ Solver::Solver (Grid& gr, string instanceName) : petsc(gr)
     glo_nTimeStep = 0;
     nImplicitCalls = 0;    
     this->instanceName = instanceName;
+    M0.resize (gr.face.size());
+    M1.resize (gr.face.size());
+    
+    //world = PETSC_COMM_WORLD;
+    
 }
+
+
 
 Solver::Petsc::Petsc (Grid& gr)
 {    
-    world = PETSC_COMM_WORLD;
-    MPI_Comm_rank (world, &rank);
-    MPI_Comm_size (world, &nProcs);
+    int nProcs;
+
+    MPI_Comm world = MPI_COMM_WORLD;
+    MPI_Comm_size (MPI_COMM_WORLD, &nProcs);
     
     /*n = 0;
     for (Cell& cll: gr.cell)

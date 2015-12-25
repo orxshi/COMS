@@ -25,22 +25,19 @@ struct Solver
         Vec x, b;
         Mat A;
         KSP ksp;
-        PC pc;
-        MPI_Comm world;
+        PC pc;        
         PetscInt n;
         PetscInt bs;
         PetscInt vecGlobalSize;
         PetscInt vecLocalSize;
         PetscInt vecLocBeg, vecLocEnd;
         PetscInt matLocBeg, matLocEnd;
-        double* DX;
-        int nProcs;
-        PetscMPIInt rank;
+        double* DX;                
         int* localSizes;
         int matLocalSize;
         
         Petsc (Grid& gr);
-        void solveAxb (Grid& gr);
+        void solveAxb (Grid& gr, vector <Matrixd<N_VAR,N_VAR>>& M0, vector <Matrixd<N_VAR,N_VAR>>& M1);
         void finalize();
     } petsc;    
     
@@ -65,6 +62,13 @@ struct Solver
     //tsOrder_t sOrder;
     //LinearSol_t linearSolverType;        
     string instanceName;
+    //Matrixd<N_VAR, N_VAR> R;
+    //Matrixd<N_VAR, N_VAR> D;
+    //MPI_Comm world;
+    
+    vector <Matrixd<N_VAR,N_VAR>> M0;
+    vector <Matrixd<N_VAR,N_VAR>> M1;
+    Roe roe;
     
     Solver (Grid& gr, string instanceName);
     
@@ -81,7 +85,7 @@ struct Solver
     void read (string fileName);
     void set_residual (Grid& g); // don't use
     void diff_to_cons_prim(Grid& g);
-    void getRes (Grid& gr, Limiter& limiter);
+    void getRes (Grid& gr, Limiter& limiter);    
     
     bool cm (string s, ifstream& in);
     template <class T> void cmh (string s, string membs, T& memb, ifstream& in, bool& found) // helper fnc for cm

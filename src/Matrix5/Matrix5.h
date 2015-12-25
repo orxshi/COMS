@@ -32,6 +32,8 @@ Vector<MAT5_SIZE> mat5Vec5Mul (const Matrix5& M, const Vector<MAT5_SIZE>& V);
 
 template<size_t nRow, size_t nCol> struct Matrixd
 {
+    //int dim;
+    //vector<int> sizes;
     array<double, nRow * nCol> mat;
     
     double operator()(const int row, const int col) const

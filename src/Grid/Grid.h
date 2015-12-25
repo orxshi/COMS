@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sstream>
+#include <mpi.h>
 #include "../Vector/Vector.h"
 #include "../Face/Face.h"
 #include "BinaryTree.h"

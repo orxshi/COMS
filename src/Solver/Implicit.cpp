@@ -1,7 +1,10 @@
 #include "Solver.h"
 
 void Solver::impl (Grid& gr)
-{   
+{    
+    int rank;
+    MPI_Comm_rank (MPI_COMM_WORLD, &rank);
+
     //Watch wt;
     
     //preSolverCheck (gr);
@@ -16,7 +19,7 @@ void Solver::impl (Grid& gr)
     Limiter limiter (gr);
     
     if (sOrder == 2) { gr.leastSquaresGrad(); }
-    roeflx (gr, limiter);
+    roe.roeflx (gr, limiter, M0, M1);
     
     for (nTimeStep=0; nTimeStep<maxTimeStep; ++nTimeStep)
     {        
@@ -30,7 +33,7 @@ void Solver::impl (Grid& gr)
             case 2:
                 //MPI_Barrier (PETSC_COMM_WORLD);
                 //wt.start();                
-                petsc.solveAxb (gr);                
+                petsc.solveAxb (gr, M0, M1);                
                 //FILE *fp;
                 //fp=fopen("../out/petscLog", "w");
                 //PetscMallocDump(fp);
@@ -50,10 +53,10 @@ void Solver::impl (Grid& gr)
         diff_to_cons_prim (gr); // only fields
         getRes (gr, limiter); // only fields
         
-        if (petsc.rank == MASTER_RANK) { outRes(gr.outputDir); }
+        if (rank == MASTER_RANK) { outRes(gr.outputDir); }
         gr.apply_BCs();
         
-        if (verbose && petsc.rank == MASTER_RANK && nTimeStep%printThres==0)
+        if (verbose && rank == MASTER_RANK && nTimeStep%printThres==0)
         {
             cout << left << setw(10) << fixed << time;
             cout << setw(10) << nTimeStep;

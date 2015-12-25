@@ -8,7 +8,7 @@ void Solver::getRes (Grid& gr, Limiter& limiter)
     
     // calculate cll.R with updated values. updateVars should be called before this    
     if (sOrder == 2) { gr.leastSquaresGrad(); }
-    roeflx (gr, limiter);
+    roe.roeflx (gr, limiter, M0, M1);
     
     if (tOrder == 1)
     {

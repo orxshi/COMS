@@ -32,7 +32,7 @@ struct Face
     CVector vb;
     face_t bouType;
     //array < Matrix5, N_NEI_FACE > M; // left matrix, right matrix
-    array < Matrixd<N_VAR,N_VAR>, N_NEI_FACE > M; // left matrix, right matrix
+    //array < Matrixd<N_VAR,N_VAR>, N_NEI_FACE > M; // left matrix, right matrix
     
     // Methods
     Face();

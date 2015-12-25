@@ -19,13 +19,46 @@
 #include "../../Grid/Grid.h"
 #include "../../Limiter/Limiter.h"
 
+
 using std::array;
 using std::pow;
 using std::cout;
 using std::endl;
 
+struct Roe
+{
+    int rank;
+    int nProcs;
+    
+    int localSizeFace;
+    int* localSizesFace;
+    int* displsFace;
+    
+    // M
+    int localSizeFaceM;
+    int* localSizesFaceM;
+    int* displsFaceM;
+    
+    // vel
+    int localSizeFaceV;
+    int* localSizesFaceV;
+    int* displsFaceV;
+    
+    // flux
+    int localSizeFaceF;
+    int* localSizesFaceF;
+    int* displsFaceF;
+    
+    vector <double> vel;
+    vector <Vector<N_VAR>> flux;    
+    
+    Roe (Grid& gr);
+    void initParallelVars (Grid& gr);
+    void roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0, vector <Matrixd<N_VAR,N_VAR>>& M1);
+};
+
 //Matrix5 jacob(const Vector<N_VAR>& q, const Vector<3>& n, double vbn);
-void roeflx (Grid& gr, Limiter& limiter);
+
 
 #endif	/* ROE_H */
 
