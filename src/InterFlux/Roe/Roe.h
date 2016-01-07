@@ -50,7 +50,7 @@ struct Roe
     int* displsFaceF;
     
     vector <double> vel;
-    vector <Vector<N_VAR>> flux;    
+    vector <Vector<N_VAR>> flux;
     
     Roe (Grid& gr);
     void initParallelVars (Grid& gr);

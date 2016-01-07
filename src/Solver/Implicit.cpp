@@ -19,30 +19,19 @@ void Solver::impl (Grid& gr)
     Limiter limiter (gr);
     
     if (sOrder == 2) { gr.leastSquaresGrad(); }
-    roe.roeflx (gr, limiter, M0, M1);
+    roe.roeflx (gr, limiter, M0, M1); // parallel
     
     for (nTimeStep=0; nTimeStep<maxTimeStep; ++nTimeStep)
     {        
-        interflux(gr);
+        interflux(gr); // serial
         
         switch (linearSolverType)
         {
             case 1:
                 gauss_seidel (gr); // only fields
                 break;
-            case 2:
-                //MPI_Barrier (PETSC_COMM_WORLD);
-                //wt.start();                
+            case 2:                
                 petsc.solveAxb (gr, M0, M1);                
-                //FILE *fp;
-                //fp=fopen("../out/petscLog", "w");
-                //PetscMallocDump(fp);
-                //PetscLogDouble pld;
-                //PetscMallocGetCurrentUsage (&pld);
-                //cout << "pld = " << pld << endl;
-                //wt.stop();
-                //PetscPrintf (this->petsc.world, "%f\n", wt.elapsedTime);
-                //MPI_Barrier (PETSC_COMM_WORLD);
                 break;
             default:
                 cout << "undefined linear solver in Solver::impl(...)" << endl;
