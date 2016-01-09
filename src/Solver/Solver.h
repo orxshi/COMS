@@ -10,10 +10,11 @@
 
 //#include <petscsys.h>
 #include <petscksp.h>
-#include "../Grid/Grid.h"
+//#include "../Grid/Grid.h"
 #include "../Output/Output.h"
 #include "../InterFlux/Roe/Roe.h"
 #include "../Time/Time.h"
+#include "../Gradient/Gradient.h"
 
 //enum class tsOrder_t {UNDEFINED=0, FIRST=1, SECOND=2}; // temporal and spatial orders
 //enum class LinearSol_t {UNDEFINED=0, MYGS=1, PETSC=2}; // linear solver for implicit method
@@ -65,6 +66,7 @@ struct Solver
     //Matrixd<N_VAR, N_VAR> R;
     //Matrixd<N_VAR, N_VAR> D;
     //MPI_Comm world;
+    Gradient gradient;
     
     vector <Matrixd<N_VAR,N_VAR>> M0;
     vector <Matrixd<N_VAR,N_VAR>> M1;

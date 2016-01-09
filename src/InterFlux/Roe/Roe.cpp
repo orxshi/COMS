@@ -224,7 +224,7 @@ void setStates(Vector<N_VAR>& primL, Vector<N_VAR>& consL, Vector<N_VAR>& primR,
     consR[4] = primR[0] * (k + ie);
 }
 
-void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0, vector <Matrixd<N_VAR,N_VAR>>& M1)
+void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0, vector <Matrixd<N_VAR,N_VAR>>& M1, Gradient& gradient)
 {
     int inc;
     int first;
@@ -293,7 +293,7 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
     }    
     
     // serial
-    limiter.venka (gr);
+    limiter.venka (gr, gradient);
     
     /*inc = gr.face.size() / nProcs;
     first = rank * inc;

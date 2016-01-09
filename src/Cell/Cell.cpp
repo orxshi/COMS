@@ -10,10 +10,10 @@ Cell::Cell()
     bc = BC::UNDEFINED;
     donor = NULL;
     //receiver = NULL;
-    for (Vector<N_DIM>& i: grad)
+    /*for (Vector<N_DIM>& i: grad)
     {
         i.fill (0.);
-    }
+    }*/
     fringeBou = fringeBou_t::UNDEFINED;
     nTrims = 0;
     nVertices = 0;
@@ -44,11 +44,11 @@ Cell::Cell (const Cell& other)
     sigma = other.sigma;
     wallDistance = other.wallDistance;
     vol = other.vol;
-    r_11 = other.r_11;
+    /*r_11 = other.r_11;
     r_12 = other.r_12;
     r_22 = other.r_22;
     r_23 = other.r_23;
-    r_33 = other.r_33;
+    r_33 = other.r_33;*/
     R = other.R;
     dQ = other.dQ;
     old_dQ = other.old_dQ;
@@ -63,7 +63,7 @@ Cell::Cell (const Cell& other)
     newlyCreated = other.newlyCreated;
     ghost = other.ghost;
     cnt = other.cnt;
-    grad = other.grad;
+    //grad = other.grad;
     emin = other.emin;
     emax = other.emax;
     face = other.face;
@@ -95,11 +95,11 @@ Cell& Cell::operator= (const Cell& other)
     sigma = other.sigma;
     wallDistance = other.wallDistance;
     vol = other.vol;
-    r_11 = other.r_11;
+    /*r_11 = other.r_11;
     r_12 = other.r_12;
     r_22 = other.r_22;
     r_23 = other.r_23;
-    r_33 = other.r_33;
+    r_33 = other.r_33;*/
     R = other.R;
     dQ = other.dQ;
     old_dQ = other.old_dQ;
@@ -114,7 +114,7 @@ Cell& Cell::operator= (const Cell& other)
     newlyCreated = other.newlyCreated;
     ghost = other.ghost;
     cnt = other.cnt;
-    grad = other.grad;
+    //grad = other.grad;
     emin = other.emin;
     emax = other.emax;
     face = other.face;    
@@ -137,11 +137,11 @@ Mach(move(other.Mach)),
 sigma(move(other.sigma)),
 wallDistance(move(other.wallDistance)),
 vol(move(other.vol)),
-r_11(move(other.r_11)),
+/*r_11(move(other.r_11)),
 r_12(move(other.r_12)),
 r_22(move(other.r_22)),
 r_23(move(other.r_23)),
-r_33(move(other.r_33)),
+r_33(move(other.r_33)),*/
 R(move(other.R)),
 dQ(move(other.dQ)),
 old_dQ(move(other.old_dQ)),
@@ -156,7 +156,7 @@ trim(move(other.trim)),
 newlyCreated(move(other.newlyCreated)),
 ghost(move(other.ghost)),
 cnt(move(other.cnt)),
-grad(move(other.grad)),
+//grad(move(other.grad)),
 emin(move(other.emin)),
 emax(move(other.emax)),   
 face(move(other.face)),
@@ -223,7 +223,7 @@ void Cell::prim_to_cons()
     cons[4] = prim[0] * (k + ie);
 }
 
-void Cell::interpolate()
+/*void Cell::interpolate()
 {
     CVector dis;        
     
@@ -238,4 +238,4 @@ void Cell::interpolate()
 
         prim_to_cons();
     }
-}
+}*/

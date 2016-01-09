@@ -26,6 +26,7 @@
 #include "../LinearAlgebra/LinearAlgebra.h"
 #include "../Point/Point.h"
 #include "../Solid/Solid.h"
+//#include "../Gradient/Gradient.h"
 
 using std::ifstream;
 using std::ofstream;
@@ -116,9 +117,9 @@ struct Grid
     void set_BCs();
     //void createOutputDir(const string mainDir);
     void identifyIBlank(Grid& gr);
-    void leastSquaresCoeffs();
-    void leastSquaresGrad();
-    void interpolate();
+    //void leastSquaresCoeffs();
+    //void leastSquaresGrad();
+    //void interpolate (Gradient& gradient);
     void trimWhoHasFringeNeighbor();
     void trimWhoHasTrimNeighbor (int threshold);
     void trimToUntrim (int crt);

@@ -1,6 +1,6 @@
 #include "Solver.h"
 
-Solver::Solver (Grid& gr, string instanceName) : petsc(gr), roe(gr)
+Solver::Solver (Grid& gr, string instanceName) : petsc(gr), roe(gr), gradient (gr)
 {
     //default    
     tOrder = 2;

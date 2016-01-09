@@ -150,7 +150,7 @@ void Solver::set_residual(Grid& g)
         //eq5 (e.D, 0.);
         e.D = 0.;
     }    
-    if (sOrder == 2) { g.leastSquaresGrad(); }
+    //if (sOrder == 2) { g.leastSquaresGrad(); }
     //roeflx (g);
     
     for (int ic=g.n_bou_elm; ic<g.cell.size(); ++ic)

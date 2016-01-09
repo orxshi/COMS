@@ -3,6 +3,15 @@
 Gradient::Gradient (Grid& gr)
 {
     grad.resize (gr.n_in_elm);
+    
+    for (int ic=0; ic<gr.n_in_elm; ++ic)
+    {
+        for (int i=0; i<N_VAR; ++i)
+        {
+            grad[ic-gr.n_bou_elm][i].fill(0.);
+        }
+    }
+    
     Wx.resize (gr.n_in_elm);
     Wy.resize (gr.n_in_elm);
     Wz.resize (gr.n_in_elm);
@@ -59,7 +68,7 @@ void Gradient::leastSquaresCoeffs (Grid& gr)
     {
         Cell& cll = gr.cell[c];
         
-        for (const int f: cell[c].nei)        
+        for (const int f: gr.cell[c].nei)        
         {            
             d = gr.cell[f].cnt - cll.cnt;
 
@@ -82,7 +91,7 @@ void Gradient::leastSquaresCoeffs (Grid& gr)
         r_23 = (r_23 - r_12 * r_13) / r_22;
         r_33 = sqrt (r_33 - pow(r_13,2.) - pow(r_23,2.));
         
-        for (const int f: cell[c].nei)
+        for (const int f: gr.cell[c].nei)
         {
             d = gr.cell[f].cnt - cll.cnt;
 
@@ -103,8 +112,7 @@ void Gradient::leastSquaresCoeffs (Grid& gr)
 }
 
 void Gradient::leastSquaresGrad (Grid& gr)
-{
-    double dx, dy, dz, a1, a2, a3, psi, Wx, Wy, Wz;
+{    
     double tempf;
     CVector d;
 
@@ -117,7 +125,7 @@ void Gradient::leastSquaresGrad (Grid& gr)
         for (int i=0; i<N_VAR; ++i)
         {
             //cll.grad[i].fill(0.);
-            grad[ic-gr.n_bou_elm].fill(0.);
+            grad[ic-gr.n_bou_elm][i].fill(0.);
         }
         
         for (const int f: cll.nei)
@@ -126,12 +134,12 @@ void Gradient::leastSquaresGrad (Grid& gr)
             {
                 tempf = gr.cell[f].prim[n] - cll.prim[n];
 
-                grad[ic-gr.n_bou_elm][n][0] += Wx * tempf;
-                grad[ic-gr.n_bou_elm][n][1] += Wy * tempf;
-                grad[ic-gr.n_bou_elm][n][2] += Wz * tempf;
+                grad[ic-gr.n_bou_elm][n][0] += Wx[ic-gr.n_bou_elm][n] * tempf;
+                grad[ic-gr.n_bou_elm][n][1] += Wy[ic-gr.n_bou_elm][n] * tempf;
+                grad[ic-gr.n_bou_elm][n][2] += Wz[ic-gr.n_bou_elm][n] * tempf;
             }
         }
     }
     
-    MPI_Allgatherv (MPI_IN_PLACE, localSizes[rank], MPI_DOUBLE, &ksiV[0][0], localSizes, displs, MPI_DOUBLE, MPI_COMM_WORLD);
+    MPI_Allgatherv (MPI_IN_PLACE, localSizes[rank], MPI_DOUBLE, &grad[0][0][0], localSizes, displs, MPI_DOUBLE, MPI_COMM_WORLD);
 }

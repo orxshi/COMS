@@ -210,7 +210,7 @@ void Solver::expl (Grid& gr)
             cll.R.fill(0.);
         }
         
-        if (sOrder == 2) { gr.leastSquaresGrad(); }
+        //if (sOrder == 2) { gr.leastSquaresGrad(); }
         
         //roeflx (gr);
          

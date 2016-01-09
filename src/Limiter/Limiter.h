@@ -10,7 +10,8 @@
 
 #include "../Vector/Vector.h"
 #include "../Constants.h"
-#include "../Grid/Grid.h"
+//#include "../Grid/Grid.h"
+#include "../Gradient/Gradient.h"
 #include <algorithm>
 #include <vector>
 #include <mpi.h>
@@ -45,7 +46,7 @@ struct Limiter
     void getLimitedGradDarwish (const Vector2D<3,N_VAR>& gradL, const Vector2D<3,N_VAR>& gradR, const CVector& rL, const CVector& rR,
                                 const Vector<N_VAR>& varL, const Vector<N_VAR>& varR, Vector<N_VAR>& reconstL, Vector<N_VAR>& reconstR); // includes minmod only
     void bj (Grid& gr);
-    void venka (Grid& gr);
+    void venka (Grid& gr, Gradient& gradient);
     void initParallelVars (Grid& gr);
 };
 

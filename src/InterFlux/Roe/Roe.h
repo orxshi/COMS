@@ -54,7 +54,7 @@ struct Roe
     
     Roe (Grid& gr);
     void initParallelVars (Grid& gr);
-    void roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0, vector <Matrixd<N_VAR,N_VAR>>& M1);
+    void roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0, vector <Matrixd<N_VAR,N_VAR>>& M1, Gradient& gradient);
 };
 
 //Matrix5 jacob(const Vector<N_VAR>& q, const Vector<3>& n, double vbn);

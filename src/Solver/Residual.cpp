@@ -6,9 +6,15 @@ void Solver::getRes (Grid& gr, Limiter& limiter)
     //res.fill(0.);    
     res.fill(BIG_NEG_NUM); // for max criterion
     
-    // calculate cll.R with updated values. updateVars should be called before this    
-    if (sOrder == 2) { gr.leastSquaresGrad(); }
-    roe.roeflx (gr, limiter, M0, M1);
+    // calculate cll.R with updated values. updateVars should be called before this
+    
+    if (sOrder == 2)
+    {
+        //gr.leastSquaresGrad();
+        gradient.leastSquaresGrad (gr);
+    }
+    
+    roe.roeflx (gr, limiter, M0, M1, gradient);
     
     if (tOrder == 1)
     {

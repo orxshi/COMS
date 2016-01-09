@@ -322,8 +322,37 @@ bool Grid::CellADT::doCubesOverlap (const Node* node, const ADTPoint& targetPoin
     return insideCube;
 }
 
-void Grid::interpolate()
+void Iblank::interpolate (Grid& gr, Gradient& gradient)
 {
-    for (Cell& cll: cell) { cll.interpolate(); }
-    apply_BCs();
+    for (int ic=0; ic<gr.cell.size(); ++ic)
+    //for (Cell& cll: cell)
+    {
+        Cell& cll = gr.cell[ic];
+    
+        //cll.interpolate();        
+        
+        CVector dis;        
+    
+        if ( cll.iBlank == iBlank_t::FRINGE )
+        {
+            for (int i=0; i<N_VAR; ++i)
+            {
+                dis = cll.cnt - cll.donor->cnt;
+                
+                if (ic<gr.n_bou_elm)
+                {
+                    cll.prim[i] = cll.donor->prim[i];
+                }
+                else
+                {
+                    cll.prim[i] = cll.donor->prim[i] + dotP(gradient.grad[cll.donor-&gr.cell[0]][i], dis);
+                }
+            }
+
+            cll.prim_to_cons();
+        }
+        
+        
+    }
+    gr.apply_BCs();
 }

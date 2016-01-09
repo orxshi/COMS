@@ -47,7 +47,7 @@ struct Cell
     double sigma;
     double wallDistance;
     double vol;
-    double r_11, r_12, r_13, r_22, r_23, r_33;
+    //double r_11, r_12, r_13, r_22, r_23, r_33;
     Vector<N_VAR> R;
     Vector<N_VAR> dQ, old_dQ;
     Vector<N_VAR> prim, cons, old_cons, oldold_cons;
@@ -57,7 +57,7 @@ struct Cell
     bool newlyCreated;
     bool ghost;
     Vector<3> cnt;
-    Vector2D <N_DIM,N_VAR> grad;
+    //Vector2D <N_DIM,N_VAR> grad;
     Vector2D <N_DIM,N_VAR> emin;
     Vector2D <N_DIM,N_VAR> emax;
     vector <int> face;    
@@ -77,7 +77,7 @@ struct Cell
     void set_centroid (const vector<Point>& pt);
     void prim_to_cons();
     void cons_to_prim();
-    void interpolate();
+    //void interpolate();
 };
 
 #endif	/* ELEMENT_H */

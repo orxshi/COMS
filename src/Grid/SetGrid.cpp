@@ -286,6 +286,6 @@ void Grid::set_grid ()
     bt.clear();
     bt.shrink_to_fit();
     set_elmCentroids();
-    leastSquaresCoeffs();
+    //leastSquaresCoeffs();
 }
 

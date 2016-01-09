@@ -8,6 +8,8 @@
 #ifndef IBLANK_H
 #define	IBLANK_H
 
+#include "../Gradient/Gradient.h"
+
 struct Iblank
 {
     enum cellCriter_t {WALL=0, SIZE=1};
@@ -15,6 +17,7 @@ struct Iblank
     
     Iblank ();
     void identify (Grid& grAct, Grid& grPas);
+    void interpolate (Grid& gr, Gradient& gradient);
 };
 
 #endif	/* IBLANK_H */

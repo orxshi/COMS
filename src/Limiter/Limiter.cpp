@@ -224,10 +224,8 @@ void Limiter::bj (Grid& gr)
     }*/
 }
 
-void Limiter::venka (Grid& gr)
+void Limiter::venka (Grid& gr, Gradient& gradient)
 {    
-    
-
     auto phi = [&] (double x, double eps)
     {
         return (pow(x,2.) + 2.*x + eps) / (pow(x,2.) + x + 2. + eps);
@@ -268,7 +266,8 @@ void Limiter::venka (Grid& gr)
             
             for (int k=0; k<N_VAR; ++k)
             {
-                double tmp = dotP(cll.grad[k],dis);
+                //double tmp = dotP(cll.grad[k],dis);
+                double tmp = dotP(gradient.grad[ic-gr.n_bou_elm][k],dis);
             
                 if (tmp > 0.)
                 {                    

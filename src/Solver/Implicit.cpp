@@ -18,8 +18,12 @@ void Solver::impl (Grid& gr)
     
     Limiter limiter (gr);
     
-    if (sOrder == 2) { gr.leastSquaresGrad(); }
-    roe.roeflx (gr, limiter, M0, M1); // parallel
+    if (sOrder == 2)
+    {
+        //gr.leastSquaresGrad();
+        gradient.leastSquaresGrad (gr);
+    }
+    roe.roeflx (gr, limiter, M0, M1, gradient); // parallel
     
     for (nTimeStep=0; nTimeStep<maxTimeStep; ++nTimeStep)
     {        
