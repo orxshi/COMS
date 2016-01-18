@@ -292,7 +292,7 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
         //eq5 (e.D, 0.);
     }    
     
-    // serial
+    // parallel
     limiter.venka (gr, gradient);
     
     /*inc = gr.face.size() / nProcs;

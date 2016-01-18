@@ -67,6 +67,7 @@ struct Solver
     //Matrixd<N_VAR, N_VAR> D;
     //MPI_Comm world;
     Gradient gradient;
+    Limiter limiter;
     
     vector <Matrixd<N_VAR,N_VAR>> M0;
     vector <Matrixd<N_VAR,N_VAR>> M1;
@@ -87,7 +88,7 @@ struct Solver
     void read (string fileName);
     void set_residual (Grid& g); // don't use
     void diff_to_cons_prim(Grid& g);
-    void getRes (Grid& gr, Limiter& limiter);    
+    void getRes (Grid& gr);    
     
     bool cm (string s, ifstream& in);
     template <class T> void cmh (string s, string membs, T& memb, ifstream& in, bool& found) // helper fnc for cm

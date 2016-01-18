@@ -16,18 +16,25 @@ void Solver::impl (Grid& gr)
     dir.append (temps);
     int printThres = 100;
     
-    Limiter limiter (gr);
+    //Limiter limiter (gr);
     
     if (sOrder == 2)
     {
         //gr.leastSquaresGrad();
-        gradient.leastSquaresGrad (gr);
+        gradient.leastSquaresGrad (gr); // parallel
     }
+    
+    
+    
     roe.roeflx (gr, limiter, M0, M1, gradient); // parallel
+    
+    
     
     for (nTimeStep=0; nTimeStep<maxTimeStep; ++nTimeStep)
     {        
         interflux(gr); // serial
+        
+        
         
         switch (linearSolverType)
         {
@@ -35,7 +42,9 @@ void Solver::impl (Grid& gr)
                 gauss_seidel (gr); // only fields
                 break;
             case 2:                
+                
                 petsc.solveAxb (gr, M0, M1);                
+                
                 break;
             default:
                 cout << "undefined linear solver in Solver::impl(...)" << endl;
@@ -44,7 +53,7 @@ void Solver::impl (Grid& gr)
         }
         
         diff_to_cons_prim (gr); // only fields
-        getRes (gr, limiter); // only fields
+        getRes (gr); // only fields
         
         if (rank == MASTER_RANK) { outRes(gr.outputDir); }
         gr.apply_BCs();

@@ -1,6 +1,6 @@
 #include "Solver.h"
 
-void Solver::getRes (Grid& gr, Limiter& limiter)
+void Solver::getRes (Grid& gr)
 {
     Vector<N_VAR> res;
     //res.fill(0.);    

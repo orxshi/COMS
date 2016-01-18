@@ -37,8 +37,11 @@ struct Limiter
     int rank;
     int nProcs;
     int localSize;
-    int* localSizes;
+    int localSizeNVAR;
+    int* localSizes;    
+    int* localSizesNVAR;
     int* displs;
+    int* displsNVAR;
     
     Limiter (Grid& gr);
     

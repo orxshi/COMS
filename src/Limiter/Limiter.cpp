@@ -32,7 +32,9 @@ void Limiter::initParallelVars (Grid& gr)
     MPI_Comm_size (MPI_COMM_WORLD, &nProcs);
     
     localSizes  = new int [nProcs];
+    localSizesNVAR  = new int [nProcs];
     displs = new int [nProcs];
+    displsNVAR = new int [nProcs];
 
     int rem;
 
@@ -49,13 +51,22 @@ void Limiter::initParallelVars (Grid& gr)
         localSize += rem;
     }
     
+    localSizeNVAR = localSize * N_VAR;
+    
     // gather localSizesFace and localSizesFaceM, F, V
     MPI_Allgather (&localSize, 1, MPI_INT, localSizes, 1, MPI_INT, MPI_COMM_WORLD);    
+    MPI_Allgather (&localSizeNVAR, 1, MPI_INT, localSizesNVAR, 1, MPI_INT, MPI_COMM_WORLD);    
     
     displs[0] = gr.n_bou_elm;
     for (int i=1; i<nProcs; ++i)
     {
         displs[i] = displs[i-1] + localSizes[i-1];
+    }
+    
+    displsNVAR[0] = 0;
+    for (int i=1; i<nProcs; ++i)
+    {
+        displsNVAR[i] = displsNVAR[i-1] + localSizesNVAR[i-1];
     }
 }
 
@@ -265,9 +276,9 @@ void Limiter::venka (Grid& gr, Gradient& gradient)
             CVector dis = f.cnt - cll.cnt;
             
             for (int k=0; k<N_VAR; ++k)
-            {
+            {                
                 //double tmp = dotP(cll.grad[k],dis);
-                double tmp = dotP(gradient.grad[ic-gr.n_bou_elm][k],dis);
+                double tmp = dotP(gradient.grad[icc][k],dis);                
             
                 if (tmp > 0.)
                 {                    
@@ -287,7 +298,7 @@ void Limiter::venka (Grid& gr, Gradient& gradient)
         }
     }
     
-    MPI_Allgatherv (MPI_IN_PLACE, localSizes[rank], MPI_DOUBLE, &ksiV[0][0], localSizes, displs, MPI_DOUBLE, MPI_COMM_WORLD);
+    MPI_Allgatherv (MPI_IN_PLACE, localSizesNVAR[rank], MPI_DOUBLE, &ksiV[0][0], localSizesNVAR, displsNVAR, MPI_DOUBLE, MPI_COMM_WORLD);
 }
 
 void minMod(const Vector2D<3,N_VAR>& gradL, const Vector2D<3,N_VAR>& gradR, Vector2D<3,N_VAR>& grad)

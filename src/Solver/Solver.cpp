@@ -1,6 +1,6 @@
 #include "Solver.h"
 
-Solver::Solver (Grid& gr, string instanceName) : petsc(gr), roe(gr), gradient (gr)
+Solver::Solver (Grid& gr, string instanceName) : petsc(gr), roe(gr), gradient (gr), limiter (gr)
 {
     //default    
     tOrder = 2;
@@ -23,9 +23,6 @@ Solver::Solver (Grid& gr, string instanceName) : petsc(gr), roe(gr), gradient (g
     this->instanceName = instanceName;
     M0.resize (gr.face.size());
     M1.resize (gr.face.size());
-    
-    //world = PETSC_COMM_WORLD;
-    
 }
 
 

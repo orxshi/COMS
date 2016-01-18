@@ -8,7 +8,7 @@ Gradient::Gradient (Grid& gr)
     {
         for (int i=0; i<N_VAR; ++i)
         {
-            grad[ic-gr.n_bou_elm][i].fill(0.);
+            grad[ic][i].fill(0.);
         }
     }
     
@@ -26,7 +26,9 @@ void Gradient::initParallelVars (Grid& gr)
     MPI_Comm_size (MPI_COMM_WORLD, &nProcs);
     
     localSizes  = new int [nProcs];
+    localSizesNVARNDIM  = new int [nProcs];
     displs = new int [nProcs];
+    displsNVARNDIM = new int [nProcs];
 
     int rem;
 
@@ -43,13 +45,22 @@ void Gradient::initParallelVars (Grid& gr)
         localSize += rem;
     }
     
+    localSizeNVARNDIM = localSize * N_VAR * N_DIM;
+    
     // gather localSizesFace and localSizesFaceM, F, V
-    MPI_Allgather (&localSize, 1, MPI_INT, localSizes, 1, MPI_INT, MPI_COMM_WORLD);    
+    MPI_Allgather (&localSize, 1, MPI_INT, localSizes, 1, MPI_INT, MPI_COMM_WORLD);
+    MPI_Allgather (&localSizeNVARNDIM, 1, MPI_INT, localSizesNVARNDIM, 1, MPI_INT, MPI_COMM_WORLD);
     
     displs[0] = gr.n_bou_elm;
     for (int i=1; i<nProcs; ++i)
     {
         displs[i] = displs[i-1] + localSizes[i-1];
+    }
+    
+    displsNVARNDIM[0] = 0;
+    for (int i=1; i<nProcs; ++i)
+    {
+        displsNVARNDIM[i] = displsNVARNDIM[i-1] + localSizesNVARNDIM[i-1];
     }
 }
 
@@ -141,5 +152,5 @@ void Gradient::leastSquaresGrad (Grid& gr)
         }
     }
     
-    MPI_Allgatherv (MPI_IN_PLACE, localSizes[rank], MPI_DOUBLE, &grad[0][0][0], localSizes, displs, MPI_DOUBLE, MPI_COMM_WORLD);
+    MPI_Allgatherv (MPI_IN_PLACE, localSizesNVARNDIM[rank], MPI_DOUBLE, &grad[0][0][0], localSizesNVARNDIM, displsNVARNDIM, MPI_DOUBLE, MPI_COMM_WORLD);
 }

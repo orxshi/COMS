@@ -2,6 +2,8 @@
 
 void Solver::Petsc::solveAxb (Grid& gr, vector <Matrixd<N_VAR,N_VAR>>& M0, vector <Matrixd<N_VAR,N_VAR>>& M1)
 {
+    
+
     int rank, nProcs;
 
     MPI_Comm world = MPI_COMM_WORLD;
@@ -29,6 +31,8 @@ void Solver::Petsc::solveAxb (Grid& gr, vector <Matrixd<N_VAR,N_VAR>>& M0, vecto
         }
     }    */
     
+    
+    
     for (PetscInt gp=vecLocBeg; gp<vecLocEnd; ++gp)
     {
         PetscInt brow = static_cast <int> (floor(gp/bs));
@@ -40,11 +44,17 @@ void Solver::Petsc::solveAxb (Grid& gr, vector <Matrixd<N_VAR,N_VAR>>& M0, vecto
         ind[gp-vecLocBeg] = gp;
         val[gp-vecLocBeg] = cll.R[i];
     }
+    
+    
         
     VecSetValues (b, vecLocalSize, ind, val, INSERT_VALUES);
     
+    
+    
     VecAssemblyBegin (b);
     VecAssemblyEnd (b);    
+    
+    
     
     // set values of A
     for (PetscInt brow=matLocBeg/bs; brow<matLocEnd/bs; ++brow)
@@ -98,6 +108,8 @@ void Solver::Petsc::solveAxb (Grid& gr, vector <Matrixd<N_VAR,N_VAR>>& M0, vecto
             }
         }
     }
+    
+    
     
     /*
     // set values of A
