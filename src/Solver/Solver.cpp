@@ -14,12 +14,18 @@ Solver::Solver (Grid& gr, string instanceName) : petsc(gr), roe(gr), gradient (g
     tol = 1e-12;    
     steady = false;
     implicit = true;
-    verbose = true;
+    verbose = true;    
+    nSampleImpl = 5;
+    nSampleInne = 5;
     
     // initialize
     time = 0.;
     glo_nTimeStep = 0;
     nImplicitCalls = 0;    
+    eTimeImpl = 0.;
+    eTimeInne = 0.;
+    isSampledImpl = false;
+    isSampledInne = false;
     this->instanceName = instanceName;
     M0.resize (gr.face.size());
     M1.resize (gr.face.size());
@@ -135,6 +141,8 @@ bool Solver::cm (string s, ifstream& in)
     cmh (s, STRINGTIFY(tOrder), tOrder, in, found);
     cmh (s, STRINGTIFY(sOrder), sOrder, in, found);
     cmh (s, STRINGTIFY(linearSolverType), linearSolverType, in, found);
+    cmh (s, STRINGTIFY(nSampleImpl), nSampleImpl, in, found);
+    cmh (s, STRINGTIFY(nSampleInne), nSampleInne, in, found);
     
     return found;
 }

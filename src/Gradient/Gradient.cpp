@@ -35,10 +35,7 @@ void Gradient::initParallelVars (Grid& gr)
     // get localSizeFace
     rem = gr.n_in_elm % nProcs;
     
-    //if (rem != 0)
-    //{        
-        localSize = (gr.n_in_elm - rem) / nProcs;
-    //}
+    localSize = (gr.n_in_elm - rem) / nProcs;
     
     if (rank == nProcs-1)
     {
@@ -128,27 +125,27 @@ void Gradient::leastSquaresGrad (Grid& gr)
     CVector d;
 
     for (int ic=displs[rank]; ic<displs[rank]+localSize; ++ic)
-    //for (int c=n_bou_elm; c<cell.size(); ++c)
-    //for (Cell& cll: cell)
     {
         Cell& cll = gr.cell[ic];
         
         for (int i=0; i<N_VAR; ++i)
         {
-            //cll.grad[i].fill(0.);
             grad[ic-gr.n_bou_elm][i].fill(0.);
         }
         
+        int ff=0;
         for (const int f: cll.nei)
         {
             for (int n=0; n<N_VAR; ++n)
             {
                 tempf = gr.cell[f].prim[n] - cll.prim[n];
 
-                grad[ic-gr.n_bou_elm][n][0] += Wx[ic-gr.n_bou_elm][n] * tempf;
-                grad[ic-gr.n_bou_elm][n][1] += Wy[ic-gr.n_bou_elm][n] * tempf;
-                grad[ic-gr.n_bou_elm][n][2] += Wz[ic-gr.n_bou_elm][n] * tempf;
+                grad[ic-gr.n_bou_elm][n][0] += Wx[ic-gr.n_bou_elm][ff] * tempf;
+                grad[ic-gr.n_bou_elm][n][1] += Wy[ic-gr.n_bou_elm][ff] * tempf;
+                grad[ic-gr.n_bou_elm][n][2] += Wz[ic-gr.n_bou_elm][ff] * tempf;
             }
+            
+            ++ff;
         }
     }
     

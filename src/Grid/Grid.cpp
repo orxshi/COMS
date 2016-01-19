@@ -33,7 +33,7 @@ Grid::Grid (string mainDir, int id)
     logDir.append (slash);
     logDir.append (temps);
     
-    nHoles = 0;
+    nHoles = 0;    
 }
 
 /*Grid::Grid (const Grid& other)

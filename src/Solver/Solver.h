@@ -50,15 +50,21 @@ struct Solver
     int tOrder;
     int sOrder;
     int linearSolverType;
+    int nSampleImpl;
+    int nSampleInne;    
     double cfl;
     double dt;
     double finalTime;
     double tol;    
     double time;
-    double aveRes;    
+    double aveRes;
+    double eTimeImpl;
+    double eTimeInne;
     bool steady;
     bool implicit;
     bool verbose;
+    bool isSampledImpl;
+    bool isSampledInne;
     //tsOrder_t tOrder;
     //tsOrder_t sOrder;
     //LinearSol_t linearSolverType;        
@@ -68,6 +74,8 @@ struct Solver
     //MPI_Comm world;
     Gradient gradient;
     Limiter limiter;
+    Watch wImpl;
+    Watch wInne;
     
     vector <Matrixd<N_VAR,N_VAR>> M0;
     vector <Matrixd<N_VAR,N_VAR>> M1;
@@ -89,6 +97,8 @@ struct Solver
     void set_residual (Grid& g); // don't use
     void diff_to_cons_prim(Grid& g);
     void getRes (Grid& gr);    
+    void printTimeInne();
+    void printTimeImpl();
     
     bool cm (string s, ifstream& in);
     template <class T> void cmh (string s, string membs, T& memb, ifstream& in, bool& found) // helper fnc for cm

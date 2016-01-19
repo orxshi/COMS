@@ -2,8 +2,6 @@
 
 void Solver::Petsc::solveAxb (Grid& gr, vector <Matrixd<N_VAR,N_VAR>>& M0, vector <Matrixd<N_VAR,N_VAR>>& M1)
 {
-    
-
     int rank, nProcs;
 
     MPI_Comm world = MPI_COMM_WORLD;
@@ -13,25 +11,6 @@ void Solver::Petsc::solveAxb (Grid& gr, vector <Matrixd<N_VAR,N_VAR>>& M0, vecto
     // set values of b
     int ind[vecLocalSize];
     double val[vecLocalSize];
-    
-    /*int cntr = 0;
-    for (int ic=gr.n_bou_elm; ic<gr.cell.size(); ++ic)
-    {
-        Cell& cll = gr.cell[ic];
-        
-        if (cll.iBlank == iBlank_t::FIELD)
-        {
-            for (int i=0; i<bs; ++i)
-            {
-                ind[cntr+i] = cntr+i;
-                val[cntr+i] = cll.R[i];
-            }
-            
-            cntr += bs;
-        }
-    }    */
-    
-    
     
     for (PetscInt gp=vecLocBeg; gp<vecLocEnd; ++gp)
     {
@@ -44,17 +23,11 @@ void Solver::Petsc::solveAxb (Grid& gr, vector <Matrixd<N_VAR,N_VAR>>& M0, vecto
         ind[gp-vecLocBeg] = gp;
         val[gp-vecLocBeg] = cll.R[i];
     }
-    
-    
         
     VecSetValues (b, vecLocalSize, ind, val, INSERT_VALUES);
     
-    
-    
     VecAssemblyBegin (b);
-    VecAssemblyEnd (b);    
-    
-    
+    VecAssemblyEnd (b);
     
     // set values of A
     for (PetscInt brow=matLocBeg/bs; brow<matLocEnd/bs; ++brow)
@@ -109,57 +82,11 @@ void Solver::Petsc::solveAxb (Grid& gr, vector <Matrixd<N_VAR,N_VAR>>& M0, vecto
         }
     }
     
-    
-    
-    /*
-    // set values of A
-    for (PetscInt gp=first; gp<last; ++gp)
-    {
-        PetscInt brow = static_cast <int> (floor(gp/bs));
-        PetscInt gpDiagStart = brow*bs;
-        PetscInt c = brow + gr.n_bou_elm;
-        PetscInt i = gp % bs;
-        
-        Cell& cll = gr.cell[c];
-        PetscInt idxn[bs];
-        double v[bs];
-        
-        for (int j=0; j<bs; ++j) { idxn[j] = gpDiagStart + j; }        
-        for (int j=0; j<bs; ++j) { v[j] = cll.D[i][j]; }
-        
-        MatSetValues (A, 1, &gp, bs, idxn, v, INSERT_VALUES);
-        
-        for (int nn=0; nn<cll.nei.size(); ++nn)
-        {
-            if (cll.nei[nn] >= gr.n_bou_elm)
-            {
-                PetscInt neiBcol = cll.nei[nn] - gr.n_bou_elm;
-                PetscInt gpNeiStart = neiBcol * bs;
-                
-                for (int j=0; j<bs; ++j) { idxn[j] = gpNeiStart + j; }
-                
-                Face& f = gr.face[cll.face[nn]];
-                if (c == f.nei[0])
-                {
-                    for (int j=0; j<bs; ++j) { v[j] = f.M[1][i][j]; }
-                }
-                else
-                {
-                    for (int j=0; j<bs; ++j) { v[j] = -f.M[0][i][j]; }
-                }
-                
-                MatSetValues (A, 1, &gp, bs, idxn, v, INSERT_VALUES);
-            }
-        }
-    }*/
-    
     MatAssemblyBegin (A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd (A, MAT_FINAL_ASSEMBLY);    
-    //
     
     KSPSolve (ksp, b, x);
     
-    //
     int recvcounts[nProcs];
     int displs[nProcs];
     displs[0] = 0;

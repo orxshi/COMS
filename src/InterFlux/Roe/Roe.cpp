@@ -29,10 +29,7 @@ void Roe::initParallelVars (Grid& gr)
     // get localSizeFace
     rem = gr.face.size() % nProcs;
     
-    //if (rem != 0)
-    //{        
-        localSizeFace = (gr.face.size() - rem) / nProcs;
-    //}
+    localSizeFace = (gr.face.size() - rem) / nProcs;
     
     if (rank == nProcs-1)
     {
@@ -122,7 +119,7 @@ Matrixd<N_VAR,N_VAR> jacob(const Vector<N_VAR>& q, const CVector& n, double vbn)
 }
 
 void setStates(Vector<N_VAR>& primL, Vector<N_VAR>& consL, Vector<N_VAR>& primR, Vector<N_VAR>& consR, const Cell& LC, const Cell& RC, const CVector& disL, const CVector& disR,
-               const CVector& rL, const CVector& rR, int iLC, int iRC, Limiter& limiter, Grid& gr)
+               const CVector& rL, const CVector& rR, int iLC, int iRC, Limiter& limiter, Grid& gr, Gradient& gradient)
 {
     double k, ie;
     Vector2D<3,N_VAR> grad;
@@ -131,30 +128,13 @@ void setStates(Vector<N_VAR>& primL, Vector<N_VAR>& consL, Vector<N_VAR>& primR,
     
     //minMod(LC.grad, RC.grad, grad);
     
-    //double ksiL = venkata (LC.grad, maxL, minL, primL, disL);
-    //double ksiR = venkata (RC.grad, maxR, minR, primR, disR);
-    
-    //limiter.getLimitedGrad (LC.grad, RC.grad, grad);
-    
-    //limiter.getLimitedGradDarwish (LC.grad, RC.grad, rL, rR, LC.prim, RC.prim, primL, primR);
-    
-    for (int i=0; i<N_VAR; ++i)
-            {
-                primL[i] = LC.prim[i];
-            }
-            for (int i=0; i<N_VAR; ++i)
-            {
-                primR[i] = RC.prim[i];
-            }
-    
-    
-    /*if (limiter.type == 3)
+    if (limiter.type == 0)
     {
         if (iLC >= gr.n_bou_elm)
         {
             for (int i=0; i<N_VAR; ++i)
-            {
-                primL[i] = LC.prim[i] + limiter.ksiV[iLC-gr.n_bou_elm][i] * dotP(LC.grad[i], disL);
+            {                
+                primL[i] = LC.prim[i] + dotP(gradient.grad[iLC-gr.n_bou_elm][i], disL);
             }
         }
         else
@@ -168,8 +148,8 @@ void setStates(Vector<N_VAR>& primL, Vector<N_VAR>& consL, Vector<N_VAR>& primR,
         if (iRC >= gr.n_bou_elm)
         {
             for (int i=0; i<N_VAR; ++i)
-            {
-                primR[i] = RC.prim[i] + limiter.ksiV[iRC-gr.n_bou_elm][i] * dotP(RC.grad[i], disR);
+            {                
+                primR[i] = RC.prim[i] + dotP(gradient.grad[iRC-gr.n_bou_elm][i], disR);
             }
         }
         else
@@ -179,25 +159,71 @@ void setStates(Vector<N_VAR>& primL, Vector<N_VAR>& consL, Vector<N_VAR>& primR,
                 primR[i] = RC.prim[i];
             }
         }
-    }*/
-    
-    /*for (int i=0; i<N_VAR; ++i)
+    }
+    else if (limiter.type == 2)
     {
-        primL[i] = LC.prim[i] + dotP(grad[i], disL);
-        primR[i] = RC.prim[i] + dotP(grad[i], disR);
-    }*/
-    
-    /*for (int i=0; i<N_VAR; ++i)
+        if (iLC >= gr.n_bou_elm)
+        {
+            for (int i=0; i<N_VAR; ++i)
+            {                
+                primL[i] = LC.prim[i] + limiter.ksiBJ[iLC-gr.n_bou_elm][i] * dotP(gradient.grad[iLC-gr.n_bou_elm][i], disL);
+            }
+        }
+        else
+        {
+            for (int i=0; i<N_VAR; ++i)
+            {
+                primL[i] = LC.prim[i];
+            }
+        }
+        
+        if (iRC >= gr.n_bou_elm)
+        {
+            for (int i=0; i<N_VAR; ++i)
+            {                
+                primR[i] = RC.prim[i] + limiter.ksiBJ[iRC-gr.n_bou_elm][i] * dotP(gradient.grad[iRC-gr.n_bou_elm][i], disR);
+            }
+        }
+        else
+        {
+            for (int i=0; i<N_VAR; ++i)
+            {
+                primR[i] = RC.prim[i];
+            }
+        }
+    }
+    else if (limiter.type == 3)
     {
-        primL[i] = LC.prim[i] + dotP(ksiL * LC.grad[i], disL);
-        primR[i] = RC.prim[i] + dotP(ksiR * RC.grad[i], disR);
-    }*/
-    
-    /*for (int i=0; i<N_VAR; ++i)
-    {
-        primL[i] = LC.prim[i] + dotP(grad[i], disL);
-        primR[i] = RC.prim[i] + dotP(grad[i], disR);
-    }*/
+        if (iLC >= gr.n_bou_elm)
+        {
+            for (int i=0; i<N_VAR; ++i)
+            {                
+                primL[i] = LC.prim[i] + limiter.ksiV[iLC-gr.n_bou_elm][i] * dotP(gradient.grad[iLC-gr.n_bou_elm][i], disL);
+            }
+        }
+        else
+        {
+            for (int i=0; i<N_VAR; ++i)
+            {
+                primL[i] = LC.prim[i];
+            }
+        }
+        
+        if (iRC >= gr.n_bou_elm)
+        {
+            for (int i=0; i<N_VAR; ++i)
+            {                
+                primR[i] = RC.prim[i] + limiter.ksiV[iRC-gr.n_bou_elm][i] * dotP(gradient.grad[iRC-gr.n_bou_elm][i], disR);
+            }
+        }
+        else
+        {
+            for (int i=0; i<N_VAR; ++i)
+            {
+                primR[i] = RC.prim[i];
+            }
+        }
+    }
     
     //-----------------------------------------------------------------------
     
@@ -273,14 +299,6 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
     Vector<N_VAR> minR;
     //--------------------------
     
-    /*MPI_Comm world = MPI_COMM_WORLD;
-    MPI_Comm_rank (world, &rank);
-    MPI_Comm_size (world, &nProcs);
-    
-    inc = gr.n_in_elm / nProcs;
-    first = gr.n_bou_elm + rank * inc;
-    last = first + inc;*/
-    
     // serial
     for (int ic=gr.n_bou_elm; ic<gr.cell.size(); ++ic)
     {
@@ -289,35 +307,19 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
         e.sigma = 0.;
         e.R.fill(0.);
         e.D = 0.;
-        //eq5 (e.D, 0.);
     }    
     
-    // parallel
-    limiter.venka (gr, gradient);
-    
-    /*inc = gr.face.size() / nProcs;
-    first = rank * inc;
-    last = first + inc;*/
-    
-    // parallel
-    //for (int iFace=first; iFace<last; ++iFace)
-    //for (int iFace=0; iFace<gr.face.size(); ++iFace)
-    
-    /*if (rank == 0)
+    // parallel    
+    if (limiter.type == 2)
     {
+        limiter.bj (gr, gradient);
+    }
+    else if (limiter.type == 3)
+    {
+        limiter.venka (gr, gradient);
+    }
     
-        cout << displsFaceV[0] << endl;
-        cout << displsFaceV[1] << endl;
-        cout << localSizesFaceV[0] << endl;
-        cout << localSizesFaceV[1] << endl;
-        cout << gr.face.size() << endl;
-        
-        exit(-2);
-        }*/
-    
-    
-    for (int iFace=displsFace[rank]; iFace<displsFace[rank]+localSizeFace; ++iFace)    
-    //for (Face& face: gr.face)
+    for (int iFace=displsFace[rank]; iFace<displsFace[rank]+localSizeFace; ++iFace)
     {
         Face& face = gr.face[iFace];
     
@@ -353,7 +355,7 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
         disL = face.cnt - LC.cnt;
         disR = face.cnt - RC.cnt;
         
-        setStates (primL, consL, primR, consR, LC, RC, disL, disR, LC.cnt, RC.cnt, iLC, iRC, limiter, gr);
+        setStates (primL, consL, primR, consR, LC, RC, disL, disR, LC.cnt, RC.cnt, iLC, iRC, limiter, gr, gradient);
 
         // Left state
         rhoL = primL[0];
@@ -633,24 +635,17 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
                 L(4,4) = 0.;
             }
             
-            Aroe = (R * ws) * L;
-            //Aroe = mul5 ( mulI5(R,ws) , L); // Aroe = (R * ws) * L
+            Aroe = (R * ws) * L;            
 
             // left and right Jacobians
             JL = jacob(consL, n, vb);
-            JR = jacob(consR, n, vb);
-            /*JL = jacob(LC.cons, n, vb);
-            JR = jacob(RC.cons, n, vb);*/
+            JR = jacob(consR, n, vb);            
 
-            // left and right matrices
-            //face.M[0] = add5(JL, Aroe); // AL = JL + Aroe
-            M0[iFace] = JL + Aroe;
-            //face.M[1] = sub5(JR, Aroe); // AR = JR - Aroe
-            M1[iFace] = JR - Aroe;
+            // left and right matrices            
+            M0[iFace] = JL + Aroe;            
+            M1[iFace] = JR - Aroe;            
             
-            //face.M[0] = mulS5 (0.5*mg, face.M[0]);
-            M0[iFace] = M0[iFace] * 0.5 * mg;
-            //face.M[1] = mulS5 (0.5*mg, face.M[1]);
+            M0[iFace] = M0[iFace] * 0.5 * mg;            
             M1[iFace] = M1[iFace] * 0.5 * mg;
         }
         else if (bc == BC::SLIP_WALL)
@@ -673,15 +668,10 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             
             M0[iFace] = jacob(consL, n, vb);
             M1[iFace] = jacob(consR, n, vb);
-            /*face.M[0] = jacob(LC.cons, n, vb);
-            face.M[1] = jacob(RC.cons, n, vb);*/
             
-            //face.M[0] = mulS5 (mg, face.M[0]);
-            M0[iFace] = M0[iFace] * mg ;
-            //face.M[1] = mulS5 (mg, face.M[1]);
-            M1[iFace] = M1[iFace] * mg;
+            M0[iFace] = M0[iFace] * mg ;            
+            M1[iFace] = M1[iFace] * mg;            
             
-            //Vector2D <N_VAR,N_VAR> M;
             Matrixd <N_VAR,N_VAR> M;
 
             M(0,0) = 1.;
@@ -712,9 +702,8 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             M(4,1) = 0.;
             M(4,2) = 0.;
             M(4,3) = 0.;
-            M(4,4) = 1.;
+            M(4,4) = 1.;            
             
-            //face.M[0] = add5 ( mul5 (face.M[1], M), face.M[0] );
             M0[iFace] = (M1[iFace] * M) + M0[iFace];
         }
         else if (bc == BC::EMPTY)
@@ -735,23 +724,9 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             
             //-----------------------------------------------
             
-            M0[iFace] = jacob(consL, n, vb);
-            //face.M[0] = jacob(LC.cons, n, vb);
-            //face.M[0] = mulS5 (2.*mg, face.M[0]);
+            M0[iFace] = jacob(consL, n, vb);            
             M0[iFace] = M0[iFace] * 2. * mg;
         }
-        
-        /*for (int i=0; i<N_VAR; ++i)
-        {
-            LC.R[i] -= flux[iFace][i];
-            RC.R[i] += flux[iFace][i];
-        }*/
-        
-        //LC.sigma += mg * vel[iFace];
-        //RC.sigma += mg * vel[iFace];
-        
-        //LC.D = LC.D + M0[iFace];        
-        //RC.D = RC.D - M1[iFace];
     }
     
     // gather face.M, vel, flux

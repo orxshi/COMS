@@ -48,7 +48,7 @@ struct Limiter
     void getLimitedGrad (const Vector2D<3,N_VAR>& gradL, const Vector2D<3,N_VAR>& gradR, Vector2D<3,N_VAR>& grad); // not verified
     void getLimitedGradDarwish (const Vector2D<3,N_VAR>& gradL, const Vector2D<3,N_VAR>& gradR, const CVector& rL, const CVector& rR,
                                 const Vector<N_VAR>& varL, const Vector<N_VAR>& varR, Vector<N_VAR>& reconstL, Vector<N_VAR>& reconstR); // includes minmod only
-    void bj (Grid& gr);
+    void bj (Grid& gr, Gradient& gradient);
     void venka (Grid& gr, Gradient& gradient);
     void initParallelVars (Grid& gr);
 };

@@ -49,6 +49,19 @@ void Solver::log (string fileName)
     out << "Spatial order = " << sOrder << endl;
     out << "maxTS/loop = " << maxTimeStep << endl;
     out << "tol = " << tol << endl;
+    
+    if (nImplicitCalls < nSampleImpl)
+    {
+        out << "could not get enough number of samples for implicit solver" << endl;
+        out << "expected number of samples = " << nSampleImpl << endl;
+        out << "real number of samples = " << nImplicitCalls << endl;
+    }
+    else
+    {
+        cout << "time spent for implicit solver for " << nSampleImpl << " samples = " << fixed << setprecision(2) << (eTimeImpl /= nSampleImpl) << wImpl.unit << endl;
+    }
+    
+    cout << "time spent for inner iter for " << nSampleInne << " samples = " << fixed << setprecision(2) << (eTimeInne /= nSampleInne) << wInne.unit << endl;
             
     out.close();
 }
@@ -85,7 +98,24 @@ void Solver::outRes (string fileName)
         cout << "could not open file in Solver::outRes(...)" << endl;
         exit(-2);
     }
-    
-    
+}
+
+void Solver::printTimeInne()
+{    
+    cout << "time spent for inner iter for " << nSampleInne << " samples = " << fixed << setprecision(2) << (eTimeInne /= nSampleInne) << wInne.unit << endl;    
+}
+
+void Solver::printTimeImpl()
+{   
+    if (nImplicitCalls < nSampleImpl)
+    {
+        cout << "could not get enough number of samples for implicit solver" << endl;
+        cout << "expected number of samples = " << nSampleImpl << endl;
+        cout << "real number of samples = " << nImplicitCalls << endl;
+    }
+    else
+    {
+        cout << "time spent for implicit solver for " << nSampleImpl << " samples = " << fixed << setprecision(2) << (eTimeImpl /= nSampleImpl) << wImpl.unit << endl;
+    }
     
 }

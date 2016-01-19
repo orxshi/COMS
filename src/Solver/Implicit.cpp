@@ -1,11 +1,11 @@
 #include "Solver.h"
 
 void Solver::impl (Grid& gr)
-{    
+{       
+    wImpl.start();
+
     int rank;
     MPI_Comm_rank (MPI_COMM_WORLD, &rank);
-
-    //Watch wt;
     
     //preSolverCheck (gr);
     
@@ -16,25 +16,17 @@ void Solver::impl (Grid& gr)
     dir.append (temps);
     int printThres = 100;
     
-    //Limiter limiter (gr);
-    
     if (sOrder == 2)
     {
-        //gr.leastSquaresGrad();
         gradient.leastSquaresGrad (gr); // parallel
     }
     
-    
-    
     roe.roeflx (gr, limiter, M0, M1, gradient); // parallel
     
-    
-    
     for (nTimeStep=0; nTimeStep<maxTimeStep; ++nTimeStep)
-    {        
+    {
+        wInne.start();
         interflux(gr); // serial
-        
-        
         
         switch (linearSolverType)
         {
@@ -42,9 +34,7 @@ void Solver::impl (Grid& gr)
                 gauss_seidel (gr); // only fields
                 break;
             case 2:                
-                
                 petsc.solveAxb (gr, M0, M1);                
-                
                 break;
             default:
                 cout << "undefined linear solver in Solver::impl(...)" << endl;
@@ -60,14 +50,28 @@ void Solver::impl (Grid& gr)
         
         if (verbose && rank == MASTER_RANK && nTimeStep%printThres==0)
         {
-            cout << left << setw(10) << fixed << time;
+            cout << left << setw(10) << fixed << setprecision(5) << time;
             cout << setw(10) << nTimeStep;
-            cout << scientific << aveRes << endl;            
+            cout << scientific << setprecision(3) << aveRes << endl;            
         }        
         
         if (fabs(aveRes) < tol) { break; }
         
         ++glo_nTimeStep;
+        
+        if (!isSampledInne)
+        {
+            wInne.stop();
+            if (nTimeStep < nSampleInne)
+            {
+                eTimeInne += wInne.elapsedTime;
+            }
+            else
+            {
+                isSampledInne = true;
+                printTimeInne();
+            }
+        }
     }
     
     for (Cell& cll: gr.cell)
@@ -77,4 +81,18 @@ void Solver::impl (Grid& gr)
     }    
     
     ++nImplicitCalls;
+    
+    if (!isSampledImpl)
+    {
+        wImpl.stop();
+        if (nImplicitCalls <= nSampleImpl)
+        {
+            eTimeImpl += wImpl.elapsedTime;
+        }
+        else
+        {
+            isSampledImpl = true;
+            printTimeImpl();
+        }
+    }
 }

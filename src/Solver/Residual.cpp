@@ -3,14 +3,11 @@
 void Solver::getRes (Grid& gr)
 {
     Vector<N_VAR> res;
-    //res.fill(0.);    
     res.fill(BIG_NEG_NUM); // for max criterion
     
     // calculate cll.R with updated values. updateVars should be called before this
-    
     if (sOrder == 2)
     {
-        //gr.leastSquaresGrad();
         gradient.leastSquaresGrad (gr);
     }
     
@@ -66,6 +63,6 @@ void Solver::getRes (Grid& gr)
         aveRes = max(res[i],aveRes);
     }
     
-    if ( isnan(aveRes) ) { cout << "averageRes is NAN in setExpRes()" << endl; exit(-2); }
-    if ( isinf(aveRes) ) { cout << "averageRes is INF in setExpRes()" << endl; exit(-2); }
+    if ( isnan(aveRes) ) { cout << "averageRes is NAN in Solver::getRes()" << endl; exit(-2); }
+    if ( isinf(aveRes) ) { cout << "averageRes is INF in Solver::getRes()" << endl; exit(-2); }
 }

@@ -5,3 +5,5 @@ steady 0
 dt 1
 cfl 20.0
 finalTime 5.0
+nSampleImpl 3
+nSampleInne 3

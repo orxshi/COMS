@@ -180,9 +180,9 @@ void Limiter::getLimitedGradDarwish (const Vector2D<3,N_VAR>& gradL, const Vecto
     }
 }
 
-void Limiter::bj (Grid& gr)
+void Limiter::bj (Grid& gr, Gradient& gradient)
 {    
-    /*Vector<N_VAR> ksiF;
+    Vector<N_VAR> ksiF;
     int icc;
 
     for (int ic=gr.n_bou_elm; ic<gr.cell.size(); ++ic)
@@ -214,7 +214,7 @@ void Limiter::bj (Grid& gr)
             
             for (int k=0; k<N_VAR; ++k)
             {
-                double tmp = dotP(cll.grad[k],dis);
+                double tmp = dotP(gradient.grad[icc][k],dis);
             
                 if (tmp > 0.)
                 {
@@ -232,7 +232,7 @@ void Limiter::bj (Grid& gr)
                 ksiBJ[icc][k] = min (ksiBJ[icc][k], ksiF[k]);
             }
         }
-    }*/
+    }
 }
 
 void Limiter::venka (Grid& gr, Gradient& gradient)
@@ -244,9 +244,8 @@ void Limiter::venka (Grid& gr, Gradient& gradient)
 
     Vector<N_VAR> ksiF;
     int icc;
-    double K = 0.3;
+    double K = 1e6;
     
-    //for (int ic=gr.n_bou_elm; ic<gr.cell.size(); ++ic)
     for (int ic=displs[rank]; ic<displs[rank]+localSize; ++ic)
     {
         Cell& cll = gr.cell[ic];
@@ -276,8 +275,7 @@ void Limiter::venka (Grid& gr, Gradient& gradient)
             CVector dis = f.cnt - cll.cnt;
             
             for (int k=0; k<N_VAR; ++k)
-            {                
-                //double tmp = dotP(cll.grad[k],dis);
+            {
                 double tmp = dotP(gradient.grad[icc][k],dis);                
             
                 if (tmp > 0.)
@@ -330,39 +328,4 @@ void minMod(const Vector2D<3,N_VAR>& gradL, const Vector2D<3,N_VAR>& gradR, Vect
             }
         }
     }
-}
-
-
-
-
-
-double venkata (const Vector2D<3,N_VAR>& grad, Vector<N_VAR>& uMax, Vector<N_VAR>& uMin, Vector<N_VAR>& u, const CVector& dis)
-{
-    double ksi;
-    Vector<N_VAR> d;
-    
-    auto phi = [&] (double y) { return (pow(y,2.) + 2.*y) / (pow(y,2.) + y + 2.); };
-    
-    for (int i=0; i<N_VAR; ++i)
-    {
-        d[i] = dotP (grad[i], dis);
-        
-        double argMax = (uMax[i] - u[i]) / d[i];
-        double argMin = (uMin[i] - u[i]) / d[i];
-        
-        if (d[i] > 0.)
-        {
-            ksi = phi (argMax);
-        }
-        else if (d[i] < 0.)
-        {
-            ksi = phi (argMin);
-        }
-        else
-        {
-            ksi = 1.;
-        }
-    }
-    
-    return ksi;
 }
