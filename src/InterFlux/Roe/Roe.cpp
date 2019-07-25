@@ -141,7 +141,6 @@ void setStates(Vector<N_VAR>& primL, Vector<N_VAR>& consL, Vector<N_VAR>& primR,
                 std::cout << "LC: " << LC.prim[0] << std::endl;
                 std::cout << "grad: " << dotP(gradient.grad[iLC-gr.n_bou_elm][0], disL) << std::endl;
             }
-            assert(primL[0] > 0.);
         }
         else
         {
@@ -334,8 +333,6 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
         Cell& LC = gr.cell[iLC];
         Cell& RC = gr.cell[iRC];
 
-        assert(LC.prim[0] > 0.);
-    
         area = face.area;
         boutype = face.bouType;
         bc = RC.bc;
@@ -384,7 +381,6 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
         {
             std::cout << "primL[0]: " << primL[0] << std::endl;
         }
-        assert(primL[0] > 0.);
 
         // Right state
         rhoR = primR[0];
@@ -420,12 +416,17 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             qm  = u*mx + v*my + w*mz;
             asq = pow(a,2);
 
+            if (std::isnan(a))
+            {
+                std::cout << "gamstar: " << gamStar << std::endl;
+                std::cout << "H: " << H << std::endl;
+                std::cout << "k: " << k << std::endl;
+            }
+
             if (rhoL <= 0.)
             {
                 std::cout << "rhoL: " << rhoL << std::endl;
             }
-            assert(rhoL > 0.);
-            assert(rhoR > 0.);
 
             assert(!std::isnan(uL));
             assert(!std::isnan(uR));

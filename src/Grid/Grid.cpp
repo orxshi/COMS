@@ -61,7 +61,7 @@ Grid::Grid (string mainDir, int id)
     holes = other.holes;
 }*/
 
-Grid::Grid (Grid&& other)
+/*Grid::Grid (Grid&& other)
 {
     n_bou_elm = other.n_bou_elm;
     n_in_elm = other.n_in_elm;
@@ -84,9 +84,9 @@ Grid::Grid (Grid&& other)
     bcVerbose = move(other.bcVerbose);
     cellADT = move(other.cellADT);
     holes = move(other.holes);
-}
+}*/
 
-Grid& Grid::operator=(Grid&& other)
+/*Grid& Grid::operator=(Grid&& other)
 {
     n_bou_elm = other.n_bou_elm;
     n_in_elm = other.n_in_elm;
@@ -109,4 +109,4 @@ Grid& Grid::operator=(Grid&& other)
     bcVerbose = move(other.bcVerbose);
     cellADT = move(other.cellADT);
     holes = move(other.holes);
-}
+}*/

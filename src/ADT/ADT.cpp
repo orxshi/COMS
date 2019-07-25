@@ -8,7 +8,7 @@ ADT::ADT()
     searchForNIntersections = false;
 }
 
-ADT::ADT (ADT&& other)
+/*ADT::ADT (ADT&& other)
 {
     sizeTree = other.sizeTree;
     //points.clear();
@@ -40,9 +40,9 @@ ADT::ADT (ADT&& other)
     //moveNodes (root, other.root);
     root = other.root;
     other.root = NULL;
-}
+}*/
 
-ADT& ADT::operator=(ADT&& other)
+/*ADT& ADT::operator=(ADT&& other)
 {
     sizeTree = other.sizeTree;
     //points.clear();
@@ -74,7 +74,7 @@ ADT& ADT::operator=(ADT&& other)
     //moveNodes (root, other.root);
     root = other.root;
     other.root = NULL;
-}
+}*/
 
 void ADT::moveNodes (Node *&leaf, Node *&otherLeaf)
 {

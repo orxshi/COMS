@@ -2,12 +2,12 @@
 address1 = ../../../../src/
 address2 = ../../../../src/AFT
 address3 = ../../../../src/ADT
-include ${PETSC_DIR}/lib/petsc/conf/variables
+#include ${PETSC_DIR}/lib/petsc/conf/variables
 #include ${PETSC_DIR}/lib/petsc/conf/rules
 #include ${PETSC_DIR}/lib/petsc/conf/test
-INC1=${PETSC_DIR}/include
-INC2=${PETSC_DIR}/$(PETSC_ARCH)/include
-CC = g++
+#INC1=${PETSC_DIR}/include
+#INC2=${PETSC_DIR}/$(PETSC_ARCH)/include
+CC = mpicxx -g
 CFLAGS = -c -std=c++11 -O3 -I$(INC1) -I$(INC2)
 LDFLAGS = -L$(address1) -Wl,-rpath=$(address1)
 LDFLAGS += -L$(address2) -Wl,-rpath=$(address2)

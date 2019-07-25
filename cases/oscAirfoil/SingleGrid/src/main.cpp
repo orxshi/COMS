@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     //solSteady.petsc.finalize();
     watchSteady.stop();
     
-   /* int countr = 0;
+    int countr = 0;
     watchOscAirfoil.start();
     
     // solve osc airfoil
@@ -64,12 +64,13 @@ int main(int argc, char** argv)
         (solOscAirfoil.implicit) ? solOscAirfoil.impl(gr) : solOscAirfoil.expl(gr);
         coeffs.getCoeffs (gr);
         outLiftCoef (coeffs, oa.alpha, solOscAirfoil.time);
+        coeffs.outPresCoef (solOscAirfoil.time);
         gr.outAllVTK (countr);
         oa.moveGrid (gr);
         
         ++countr;
     }
-    watchOscAirfoil.stop();*/
+    watchOscAirfoil.stop();
     
     //if (rank == MASTER_RANK)
     {
@@ -77,11 +78,11 @@ int main(int argc, char** argv)
         gr.outAllVTK (0);
         coeffs.out.close();
         log (mainDir, watchSteady.elapsedTime, "elapsedTimeSteady", watchSteady.unit);
-        //log (mainDir, watchOscAirfoil.elapsedTime, "elapsedTimeOscAirfoil", watchOscAirfoil.unit);
+        log (mainDir, watchOscAirfoil.elapsedTime, "elapsedTimeOscAirfoil", watchOscAirfoil.unit);
         solSteady.log (gr.logDir);
-        //solOscAirfoil.log (gr.logDir);
+        solOscAirfoil.log (gr.logDir);
         sma.log (gr.logDir);
-        //oa.log (gr.logDir);
+        oa.log (gr.logDir);
         gr.log();
     }
     

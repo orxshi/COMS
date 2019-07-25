@@ -184,8 +184,9 @@ void Iblank::identify (Grid& grAct, Grid& grPas)
                 }
                 else
                 {
-                    cout << "undefined behavior in Grid::identifyIBlank(...)" << endl;
-                    exit(-2);
+                    //std::cout << "ibalnk: " << static_cast<int>(grPas.cell[index].iBlank) << std::endl;
+                    //cout << "undefined behavior in Grid::identifyIBlank(...)" << endl;
+                    //exit(-2);
                 }
             }
         }
@@ -345,7 +346,8 @@ void Iblank::interpolate (Grid& gr, Gradient& gradient)
                 }
                 else
                 {
-                    cll.prim[i] = cll.donor->prim[i] + dotP(gradient.grad[cll.donor-&gr.cell[0]][i], dis);
+                    //cll.prim[i] = cll.donor->prim[i] + dotP(gradient.grad[cll.donor-&gr.cell[0]][i], dis);
+                    cll.prim[i] = cll.donor->prim[i];
                 }
             }
 

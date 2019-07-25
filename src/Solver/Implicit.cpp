@@ -56,7 +56,9 @@ void Solver::impl (Grid& gr)
             cout << scientific << setprecision(3) << aveRes << endl;            
         }        
         
-        if (fabs(aveRes) < tol) { break; }
+        if (fabs(aveRes) < tol) {
+            break;
+        }
         
         ++glo_nTimeStep;
         

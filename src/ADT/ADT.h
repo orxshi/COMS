@@ -101,8 +101,8 @@ struct ADT
     // Constructor
     ADT();    
     // Move constructor
-    ADT (ADT&& other);
-    ADT& operator=(ADT&& other);
+    //ADT (ADT&& other);
+    //ADT& operator=(ADT&& other);
     // Destructor
     ~ADT();
 

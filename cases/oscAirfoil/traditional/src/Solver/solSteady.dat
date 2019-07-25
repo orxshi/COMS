@@ -1,7 +1,7 @@
 linearSolverType 1
-cfl 40.0
+cfl 20.0
 steady 1
 sOrder 1
 tOrder 1
-maxTimeStep 10000
-tol 1e-6
+nSampleImpl 3
+nSampleInne 3

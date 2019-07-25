@@ -12,9 +12,9 @@ Solver::Solver (Grid& gr, string instanceName) : roe(gr), gradient (gr), limiter
     cfl = 5;
     dt = 0.001;
     finalTime = 1000.;
-    tol = 8e-4;    
+    tol = 1e-11;    
     steady = true;
-    implicit = false;
+    implicit = true;
     verbose = true;    
     nSampleImpl = 5;
     nSampleInne = 5;

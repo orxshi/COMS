@@ -65,7 +65,7 @@ struct Grid
     int phys_count;
     int nHoles;    
     double wallDistance;    
-    ifstream in; // for reading grid input
+    //ifstream in; // for reading grid input
     string meshFile;
     string outputDir;
     string mainDir;
@@ -87,19 +87,20 @@ struct Grid
     } cellADT;
 
     // Constructor
+    Grid() = default;
     Grid (string mainDir, int id);
     //Grid (const Grid&);
-    Grid (Grid&& other);
-    Grid& operator=(Grid&& other);
+    //Grid (Grid&& other);
+    //Grid& operator=(Grid&& other);
     
     // Destructor
     ~Grid ();
 
     // Private Methods
-    void read_ptSize ();
-    void read_pt ();
-    void read_elmSize ();
-    void read_elm ();
+    void read_ptSize (ifstream& in);
+    void read_pt (ifstream& in);
+    void read_elmSize (ifstream& in);
+    void read_elm (ifstream& in);
     void set_faceVertices (Face& face, const Cell& elm, const int index);
     void set_connectivity ();
     void set_elmVolumes ();

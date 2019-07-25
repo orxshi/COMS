@@ -1,6 +1,6 @@
 #include "Grid.h"
 
-void Grid::read_ptSize ()
+void Grid::read_ptSize (ifstream& in)
 {
     string temps;
     int tempi;
@@ -25,7 +25,7 @@ void Grid::read_ptSize ()
     }
 }
 
-void Grid::read_pt()
+void Grid::read_pt(ifstream& in)
 {
     string temps;
     
@@ -40,7 +40,7 @@ void Grid::read_pt()
     }
 }
 
-void Grid::read_elmSize ()
+void Grid::read_elmSize (ifstream& in)
 {
     std::string temps;
     int tempi;
@@ -54,7 +54,7 @@ void Grid::read_elmSize ()
     in >> totalNElms;
 }
 
-void Grid::read_elm ()
+void Grid::read_elm (ifstream& in)
 {
     bool stillBoundary = true;
     int n_tags;
@@ -411,12 +411,13 @@ void Grid::printInput()
 
 void Grid::read_grid ()
 {
+    ifstream in;
     readInput();
     printInput();
-    read_ptSize ();
-    read_pt();
-    read_elmSize ();
-    read_elm ();    
+    read_ptSize (in);
+    read_pt(in);
+    read_elmSize (in);
+    read_elm (in);    
     printMeshInfo();
     in.close();
 }

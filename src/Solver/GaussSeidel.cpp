@@ -1,6 +1,6 @@
 #include "Solver.h"
 
-/*inline void invertMat5(const Matrix5& A, const Vector<N_VAR>& f, Vector<N_VAR>& x)
+inline void invertMat5(const Matrixd<5,5>& A, const Vector<N_VAR>& f, Vector<N_VAR>& x)
 {
     // perform x = inv (A)*f
 
@@ -9,31 +9,31 @@
     double d1,d2,d3,d4,d5;
 
     // decompose A into L and U
-    b11 = 1 / A[0][0];
-    u12 = A[0][1] * b11;
-    u13 = A[0][2] * b11;
-    u14 = A[0][3] * b11;
-    u15 = A[0][4] * b11;
-    b21 = A[1][0];
-    b22 = 1 / (A[1][1] - b21 * u12);
-    u23 = (A[1][2] - b21 * u13) * b22;
-    u24 = (A[1][3] - b21 * u14) * b22;
-    u25 = (A[1][4] - b21 * u15) * b22;
-    b31 = A[2][0];
-    b32 = A[2][1] - b31 * u12;
-    b33 = 1 / (A[2][2] - b31 * u13 - b32 * u23);
-    u34 = (A[2][3] - b31 * u14 - b32 * u24) * b33;
-    u35 = (A[2][4] - b31 * u15 - b32 * u25) * b33;
-    b41 = A[3][0];
-    b42 = A[3][1] - b41 * u12;
-    b43 = A[3][2] - b41 * u13 - b42 * u23;
-    b44 = 1 / (A[3][3] - b41 * u14 - b42 * u24 - b43 * u34);
-    u45 = (A[3][4] - b41 * u15 - b42 * u25 - b43 * u35) * b44;
-    b51 = A[4][0];
-    b52 = A[4][1] - b51 * u12;
-    b53 = A[4][2] - b51 * u13 - b52 * u23;
-    b54 = A[4][3] - b51 * u14 - b52 * u24 - b53 * u34;
-    b55 = 1 / (A[4][4] - b51 * u15 - b52 * u25 - b53 * u35 - b54 * u45);
+    b11 = 1 / A(0,0);
+    u12 = A(0,1) * b11;
+    u13 = A(0,2) * b11;
+    u14 = A(0,3) * b11;
+    u15 = A(0,4) * b11;
+    b21 = A(1,0);
+    b22 = 1 / (A(1,1) - b21 * u12);
+    u23 = (A(1,2) - b21 * u13) * b22;
+    u24 = (A(1,3) - b21 * u14) * b22;
+    u25 = (A(1,4) - b21 * u15) * b22;
+    b31 = A(2,0);
+    b32 = A(2,1) - b31 * u12;
+    b33 = 1 / (A(2,2) - b31 * u13 - b32 * u23);
+    u34 = (A(2,3) - b31 * u14 - b32 * u24) * b33;
+    u35 = (A(2,4) - b31 * u15 - b32 * u25) * b33;
+    b41 = A(3,0);
+    b42 = A(3,1) - b41 * u12;
+    b43 = A(3,2) - b41 * u13 - b42 * u23;
+    b44 = 1 / (A(3,3) - b41 * u14 - b42 * u24 - b43 * u34);
+    u45 = (A(3,4) - b41 * u15 - b42 * u25 - b43 * u35) * b44;
+    b51 = A(4,0);
+    b52 = A(4,1) - b51 * u12;
+    b53 = A(4,2) - b51 * u13 - b52 * u23;
+    b54 = A(4,3) - b51 * u14 - b52 * u24 - b53 * u34;
+    b55 = 1 / (A(4,4) - b51 * u15 - b52 * u25 - b53 * u35 - b54 * u45);
     //
     d1 = f[0] * b11;
     d2 = (f[1] - b21 * d1) * b22;
@@ -46,7 +46,7 @@
     x[2] = d3 - u34 * x[3] - u35 * d5;
     x[1] = d2 - u23 * x[2] - u24 * x[3] - u25 * d5;
     x[0] = d1 - u12 * x[1] - u13 * x[2] - u14 * x[3] - u15 * d5;
-}*/
+}
 
 /*inline Vector<MAT5_SIZE> mat5Vec5Mul (const Matrix5& M, const Vector<MAT5_SIZE>& V)
 {
@@ -95,9 +95,9 @@ inline void common2 (Cell& e, const vector<Face>& face, vector<Cell>& cell)
     //invertMat5(e.D, sum, e.dQ);
 }
 
-inline void common (Cell& e, const vector<Face>& face, vector<Cell>& cell)
+inline void common (Cell& e, const vector<Face>& face, vector<Cell>& cell, const vector <Matrixd<N_VAR,N_VAR>>& M0, const vector <Matrixd<N_VAR,N_VAR>>& M1)
 {
-    //invertMat5(e.D, e.R, e.dQ); // dQ = inv(D) * res
+    invertMat5(e.D, e.R, e.dQ); // dQ = inv(D) * res
     
     Vector<N_VAR> ddQ = e.dQ - e.old_dQ;
 
@@ -112,11 +112,13 @@ inline void common (Cell& e, const vector<Face>& face, vector<Cell>& cell)
         {
             //RC.R += mat5Vec5Mul(f.M[0], ddQ);
             //RC.R += f.M[0] % ddQ;
+            RC.R += M0[i] % ddQ;
         }
         else
         {
             //LC.R -= mat5Vec5Mul(f.M[1], ddQ);
             //LC.R -= f.M[1] % ddQ;
+            LC.R -= M1[i] % ddQ;
         }
     }
 }
@@ -206,7 +208,7 @@ void Solver::gauss_seidel (Grid& g)
         
             if (e.iBlank == iBlank_t::FIELD)
             {
-                common (e, g.face, g.cell);
+                common (e, g.face, g.cell, M0, M1);
                 e.old_dQ = e.dQ;
             }
         }
@@ -218,7 +220,7 @@ void Solver::gauss_seidel (Grid& g)
         
             if (e.iBlank == iBlank_t::FIELD)
             {
-                common (e, g.face, g.cell);
+                common (e, g.face, g.cell, M0, M1);
                 e.old_dQ = e.dQ;
             }
         }
