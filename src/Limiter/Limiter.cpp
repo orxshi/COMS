@@ -3,6 +3,7 @@
 Limiter::Limiter (Grid& gr)
 {
     // defaults
+    //type = 3;
     type = 3;
     
     if (type == 2)

@@ -63,6 +63,6 @@ void Solver::getRes (Grid& gr)
         aveRes = max(res[i],aveRes);
     }
     
-    if ( isnan(aveRes) ) { cout << "averageRes is NAN in Solver::getRes()" << endl; exit(-2); }
-    if ( isinf(aveRes) ) { cout << "averageRes is INF in Solver::getRes()" << endl; exit(-2); }
+    if ( std::isnan(aveRes) ) { cout << "averageRes is NAN in Solver::getRes()" << endl; exit(-2); }
+    if ( std::isinf(aveRes) ) { cout << "averageRes is INF in Solver::getRes()" << endl; exit(-2); }
 }

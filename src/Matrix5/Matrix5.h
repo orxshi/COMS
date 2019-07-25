@@ -11,6 +11,7 @@
 #include <array>
 #include <vector>
 #include <iostream>
+#include <cassert>
 #include "../Vector/Vector.h"
 
 using std::array;
@@ -164,6 +165,7 @@ template<size_t nRow, size_t nCol> struct Matrixd
                 mat[r*nCol+c] = s;
             }
         }
+        return *this;
     }
 };
 

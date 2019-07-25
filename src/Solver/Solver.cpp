@@ -1,19 +1,20 @@
 #include "Solver.h"
 
-Solver::Solver (Grid& gr, string instanceName) : petsc(gr), roe(gr), gradient (gr), limiter (gr)
+//Solver::Solver (Grid& gr, string instanceName) : petsc(gr), roe(gr), gradient (gr), limiter (gr)
+Solver::Solver (Grid& gr, string instanceName) : roe(gr), gradient (gr), limiter (gr)
 {
     //default    
-    tOrder = 2;
+    tOrder = 1;
     sOrder = 1;
     linearSolverType = 1; // MYGS
     nGaussIter = 5;
-    maxTimeStep = 10000;
+    maxTimeStep = 10000000;
     cfl = 5;
-    dt = 1.;
-    finalTime = 10.;
-    tol = 1e-12;    
-    steady = false;
-    implicit = true;
+    dt = 0.001;
+    finalTime = 1000.;
+    tol = 8e-4;    
+    steady = true;
+    implicit = false;
     verbose = true;    
     nSampleImpl = 5;
     nSampleInne = 5;
@@ -33,21 +34,21 @@ Solver::Solver (Grid& gr, string instanceName) : petsc(gr), roe(gr), gradient (g
 
 
 
-Solver::Petsc::Petsc (Grid& gr)
+/*Solver::Petsc::Petsc (Grid& gr)
 {    
     int nProcs;
 
     MPI_Comm world = MPI_COMM_WORLD;
     MPI_Comm_size (MPI_COMM_WORLD, &nProcs);
     
-    /*n = 0;
-    for (Cell& cll: gr.cell)
-    {
-        if (cll.iBlank == iBlank_t::FIELD)
-        {
-            ++n;
-        }
-    }*/
+    //n = 0;
+    //for (Cell& cll: gr.cell)
+    //{
+        //if (cll.iBlank == iBlank_t::FIELD)
+        //{
+            //++n;
+        //}
+    //}
     
     n = gr.n_in_elm;
     bs = N_VAR;
@@ -109,7 +110,7 @@ Solver::Petsc::Petsc (Grid& gr)
     }
     
     MPI_Allgatherv (&vecLocalSize, 1, MPI_INT, localSizes, recvcounts, displs, MPI_INT, world);
-}
+}*/
 
 void Solver::preSolverCheck (const Grid& gr)
 {

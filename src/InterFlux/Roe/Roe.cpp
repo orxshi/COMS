@@ -136,6 +136,12 @@ void setStates(Vector<N_VAR>& primL, Vector<N_VAR>& consL, Vector<N_VAR>& primR,
             {                
                 primL[i] = LC.prim[i] + dotP(gradient.grad[iLC-gr.n_bou_elm][i], disL);
             }
+            if (primL[0] <= 0.)
+            {
+                std::cout << "LC: " << LC.prim[0] << std::endl;
+                std::cout << "grad: " << dotP(gradient.grad[iLC-gr.n_bou_elm][0], disL) << std::endl;
+            }
+            assert(primL[0] > 0.);
         }
         else
         {
@@ -298,7 +304,7 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
     Vector<N_VAR> minL;
     Vector<N_VAR> minR;
     //--------------------------
-    
+
     // serial
     for (int ic=gr.n_bou_elm; ic<gr.cell.size(); ++ic)
     {
@@ -307,8 +313,8 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
         e.sigma = 0.;
         e.R.fill(0.);
         e.D = 0.;
-    }    
-    
+    }
+
     // parallel    
     if (limiter.type == 2)
     {
@@ -327,6 +333,8 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
         int iRC = face.nei[1];
         Cell& LC = gr.cell[iLC];
         Cell& RC = gr.cell[iRC];
+
+        assert(LC.prim[0] > 0.);
     
         area = face.area;
         boutype = face.bouType;
@@ -372,6 +380,12 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
         qmL  = uL*mx + vL*my + wL*mz;
         HL   = (EL + pL) / rhoL;
 
+        if (primL[0] <= 0.)
+        {
+            std::cout << "primL[0]: " << primL[0] << std::endl;
+        }
+        assert(primL[0] > 0.);
+
         // Right state
         rhoR = primR[0];
         uR   = primR[1];
@@ -406,6 +420,24 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             qm  = u*mx + v*my + w*mz;
             asq = pow(a,2);
 
+            if (rhoL <= 0.)
+            {
+                std::cout << "rhoL: " << rhoL << std::endl;
+            }
+            assert(rhoL > 0.);
+            assert(rhoR > 0.);
+
+            assert(!std::isnan(uL));
+            assert(!std::isnan(uR));
+            assert(!std::isnan(RT));
+
+            assert(!std::isnan(u));
+            assert(!std::isnan(v));
+            assert(!std::isnan(w));
+            assert(!std::isnan(nx));
+            assert(!std::isnan(ny));
+            assert(!std::isnan(nz));
+
             // Wave strengths
             drho = rhoR - rhoL;
             dp   = pR - pL;
@@ -425,6 +457,16 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             ws[2] = fabs(qn + a - vb);
             ws[3] = fabs(qn - vb);
             ws[4] = fabs(qn - vb);
+
+            assert(!std::isnan(qn));
+            assert(!std::isnan(a));
+            assert(!std::isnan(vb));
+
+            assert(!std::isnan(ws[0]));
+            assert(!std::isnan(ws[1]));
+            assert(!std::isnan(ws[2]));
+            assert(!std::isnan(ws[3]));
+            assert(!std::isnan(ws[4]));
             
             // Right eigenvectors
             R(0,0) = 1.;
@@ -497,8 +539,12 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
                 {
                     //diss[i] += ws[j] * LdU[j] * R[i][j];
                     diss[i] += ws[j] * LdU[j] * R(i,j);
+                    assert(!std::isnan(ws[j]));
+                    assert(!std::isnan(LdU[j]));
+                    assert(!std::isnan(R(i,j)));
                 }
             }
+
 
             // Physical flux
             fluxL[0] = rhoL * (qnL - vb);
@@ -513,11 +559,35 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             fluxR[3] = rhoR * (qnR - vb) * wR + pR*nz;
             fluxR[4] = (qnR - vb) * ER + qnR * pR;
 
+            assert(!std::isnan(fluxL[0]));
+            assert(!std::isnan(fluxL[1]));
+            assert(!std::isnan(fluxL[2]));
+            assert(!std::isnan(fluxL[3]));
+            assert(!std::isnan(fluxL[4]));
+
+            assert(!std::isnan(fluxR[0]));
+            assert(!std::isnan(fluxR[1]));
+            assert(!std::isnan(fluxR[2]));
+            assert(!std::isnan(fluxR[3]));
+            assert(!std::isnan(fluxR[4]));
+
             // Numerical flux
             for (int i=0; i<N_VAR; ++i)
             {
                 flux[iFace][i] = 0.5 * (fluxL[i] + fluxR[i] - diss[i]) * mg;
             }
+
+            assert(!std::isnan(diss[0]));
+            assert(!std::isnan(diss[1]));
+            assert(!std::isnan(diss[2]));
+            assert(!std::isnan(diss[3]));
+            assert(!std::isnan(diss[4]));
+
+            assert(!std::isnan(flux[iFace][0]));
+            assert(!std::isnan(flux[iFace][1]));
+            assert(!std::isnan(flux[iFace][2]));
+            assert(!std::isnan(flux[iFace][3]));
+            assert(!std::isnan(flux[iFace][4]));
 
             vel[iFace] = fabs(qn-vb) + a;
             
@@ -662,6 +732,12 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             flux[iFace][3] *= mg;
             flux[iFace][4] *= mg;
 
+            assert(!std::isnan(flux[iFace][0]));
+            assert(!std::isnan(flux[iFace][1]));
+            assert(!std::isnan(flux[iFace][2]));
+            assert(!std::isnan(flux[iFace][3]));
+            assert(!std::isnan(flux[iFace][4]));
+
             vel[iFace] = fabs(qnR-vb) + aR;
             
             //-----------------------------------------------
@@ -720,6 +796,12 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             flux[iFace][3] *= mg;
             flux[iFace][4] *= mg;
 
+            assert(!std::isnan(flux[iFace][0]));
+            assert(!std::isnan(flux[iFace][1]));
+            assert(!std::isnan(flux[iFace][2]));
+            assert(!std::isnan(flux[iFace][3]));
+            assert(!std::isnan(flux[iFace][4]));
+
             vel[iFace] = fabs(qnR-vb) + aR;
             
             //-----------------------------------------------
@@ -727,6 +809,12 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             M0[iFace] = jacob(consL, n, vb);            
             M0[iFace] = M0[iFace] * 2. * mg;
         }
+
+        assert(!std::isnan(flux[iFace][0]));
+        assert(!std::isnan(flux[iFace][1]));
+        assert(!std::isnan(flux[iFace][2]));
+        assert(!std::isnan(flux[iFace][3]));
+        assert(!std::isnan(flux[iFace][4]));
     }
     
     // gather face.M, vel, flux
@@ -751,6 +839,7 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
                 for (int i=0; i<N_VAR; ++i)
                 {
                     cll.R[i] -= flux[f][i];                    
+                    assert(!std::isnan(flux[f][i]));
                 }                
                 
                 cll.D = cll.D + M0[f];
@@ -760,6 +849,7 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
                 for (int i=0; i<N_VAR; ++i)
                 {
                     cll.R[i] += flux[f][i];                    
+                    assert(!std::isnan(flux[f][i]));
                 }                
                 
                 cll.D = cll.D - M1[f];

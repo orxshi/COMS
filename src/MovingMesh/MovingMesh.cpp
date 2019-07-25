@@ -163,7 +163,7 @@ void MovingGrid::getAllFaceVelocities (Grid& gr)
         }
     }
     
-    checkGCL(gr);
+    //checkGCL(gr);
     
     gr.apply_BCs();
 }

@@ -1,4 +1,4 @@
-linearSolverType 2
+linearSolverType 1
 cfl 20.0
 steady 1
 sOrder 1

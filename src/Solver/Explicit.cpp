@@ -17,6 +17,14 @@ void Solver::updateVars (Grid& gr)
             {
                 cll.cons[i] += dt * cll.R[i] / cll.vol;
             }
+
+            /*if (cll.cons[0] < 0.)
+            {
+                std::cout << "dt: " << dt << std::endl;
+                std::cout << "R: " << cll.R[0] << std::endl;
+                std::cout << "vol: " << cll.vol << std::endl;
+            }
+            assert(cll.cons[0] > 0.);*/
         }
         else if (tOrder == 2)
         {
@@ -38,8 +46,8 @@ void Solver::updateVars (Grid& gr)
 double Solver::setExpRes (Grid& gr)
 {
     Vector<N_VAR> res;
-    //res.fill(0.);    
-    res.fill(BIG_NEG_NUM);
+    res.fill(0.);    
+    //res.fill(BIG_NEG_NUM);
     int cc;
     
     // calculate cll.R with updated values. updateVars should be called before this.
@@ -82,6 +90,9 @@ double Solver::setExpRes (Grid& gr)
                         }*/
                         
                         res[i] += pow(RHS, 2);
+                        assert(!std::isnan(RHS));
+                        assert(!std::isnan(res[i]));
+                        //std::cout << "RHS: " << RHS << " " << res[i] << std::endl;
                     }
                 }
             }
@@ -168,8 +179,8 @@ double Solver::setExpRes (Grid& gr)
     }
     //averageRes /= N_VAR;
     
-    if ( isnan(averageRes) ) { cout << "averageRes is NAN in setExpRes()" << endl; exit(-2); }
-    if ( isinf(averageRes) ) { cout << "averageRes is INF in setExpRes()" << endl; exit(-2); }
+    if ( std::isnan(averageRes) ) { cout << "averageRes is NAN in setExpRes()" << endl; exit(-2); }
+    if ( std::isinf(averageRes) ) { cout << "averageRes is INF in setExpRes()" << endl; exit(-2); }
 
     /*cout << "cc = " << cc << endl;
     cout << "ccBlank = " << static_cast<int>(gr.cell[cc].iBlank) << endl;
@@ -211,8 +222,14 @@ void Solver::expl (Grid& gr)
         }
         
         //if (sOrder == 2) { gr.leastSquaresGrad(); }
+
+        for (int ic=gr.n_bou_elm; ic<gr.cell.size(); ++ic)
+        {
+            assert(gr.cell[ic].prim[0] > 0.);
+        }
         
         //roeflx (gr);
+        roe.roeflx (gr, limiter, M0, M1, gradient); // parallel
          
         updateVars(gr);
         gr.apply_BCs();        
@@ -221,7 +238,7 @@ void Solver::expl (Grid& gr)
         
         if (verbose)
         {
-            cout << left << setw(10) << time;
+            cout << left << fixed << std::setprecision(3) << setw(20) << time;
             cout << setw(10) << nTimeStep;
             //if (!useCFL) { cout << setw(10) << fixed << setprecision(3) << time; }
             cout << scientific << aveRes << endl;

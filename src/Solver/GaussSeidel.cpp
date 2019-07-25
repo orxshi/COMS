@@ -161,7 +161,7 @@ void Solver::set_residual(Grid& g)
         {
             for (auto i=0; i<e.dQ.size(); ++i)
             {
-                if ( isnan(e.dQ[i]) ) { cout << "e.dQ[i] is NAN in Solver::set_residual(...)" << endl; exit(-2); }
+                if ( std::isnan(e.dQ[i]) ) { cout << "e.dQ[i] is NAN in Solver::set_residual(...)" << endl; exit(-2); }
                 res[i] = max(fabs(e.R[i]),res[i]);
                 //res[i] += pow( e.dQ[i],2 );
                 
@@ -186,8 +186,8 @@ void Solver::set_residual(Grid& g)
     //aveRes = std::accumulate (res.begin(), res.end(),0.);
     //aveRes /= N_VAR;
     
-    if ( isnan(aveRes) ) { cout << "aveRes is NAN in Solver::set_residual(...)" << endl; exit(-2); }
-    if ( isinf(aveRes) ) { cout << "aveRes is INF in Solver::set_residual(...)" << endl; exit(-2); }
+    if ( std::isnan(aveRes) ) { cout << "aveRes is NAN in Solver::set_residual(...)" << endl; exit(-2); }
+    if ( std::isinf(aveRes) ) { cout << "aveRes is INF in Solver::set_residual(...)" << endl; exit(-2); }
 }
 
 void Solver::gauss_seidel (Grid& g)

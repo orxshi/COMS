@@ -9,19 +9,21 @@
 #define	SOLVER_H
 
 //#include <petscsys.h>
-#include <petscksp.h>
+//#include <petscksp.h>
 //#include "../Grid/Grid.h"
 #include "../Output/Output.h"
 #include "../InterFlux/Roe/Roe.h"
 #include "../Time/Time.h"
 #include "../Gradient/Gradient.h"
+#include <cmath>
+#include <cassert>
 
 //enum class tsOrder_t {UNDEFINED=0, FIRST=1, SECOND=2}; // temporal and spatial orders
 //enum class LinearSol_t {UNDEFINED=0, MYGS=1, PETSC=2}; // linear solver for implicit method
 
 struct Solver
 {
-    struct Petsc
+    /*struct Petsc
     {
         Vec x, b;
         Mat A;
@@ -40,7 +42,7 @@ struct Solver
         Petsc (Grid& gr);
         void solveAxb (Grid& gr, vector <Matrixd<N_VAR,N_VAR>>& M0, vector <Matrixd<N_VAR,N_VAR>>& M1);
         void finalize();
-    } petsc;    
+    } petsc;*/
     
     int nGaussIter;
     int maxTimeStep;

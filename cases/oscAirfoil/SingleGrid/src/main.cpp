@@ -1,4 +1,4 @@
-#include <petscsys.h>
+//#include <petscsys.h>
 #include "../../../../src/Grid/Grid.h"
 #include "../../../../src/Output/Output.h"
 #include "../../../../src/Solid/Solid.h"
@@ -11,15 +11,16 @@
 
 int main(int argc, char** argv)
 {
-    PetscInitialize (&argc, &argv, NULL, NULL);
+    //PetscInitialize (&argc, &argv, NULL, NULL);
+    MPI_Init(NULL, NULL);
     
     Watch watchSteady;
     Watch watchOscAirfoil;
     
-    PetscMPIInt rank, n_procs;
-    MPI_Comm world = PETSC_COMM_WORLD;
-    MPI_Comm_rank (world, &rank);
-    MPI_Comm_size (world, &n_procs);
+    //PetscMPIInt rank, n_procs;
+    //MPI_Comm world = PETSC_COMM_WORLD;
+    //MPI_Comm_rank (world, &rank);
+    //MPI_Comm_size (world, &n_procs);
     
     string mainDir = createOutputDir();
     
@@ -49,10 +50,10 @@ int main(int argc, char** argv)
     sma.getAllFaceVelocities (gr);
     watchSteady.start();
     (solSteady.implicit) ? solSteady.impl(gr) : solSteady.expl(gr);
-    solSteady.petsc.finalize();
+    //solSteady.petsc.finalize();
     watchSteady.stop();
     
-    int countr = 0;
+   /* int countr = 0;
     watchOscAirfoil.start();
     
     // solve osc airfoil
@@ -68,23 +69,24 @@ int main(int argc, char** argv)
         
         ++countr;
     }
-    watchOscAirfoil.stop();
+    watchOscAirfoil.stop();*/
     
-    if (rank == MASTER_RANK)
+    //if (rank == MASTER_RANK)
     {
         //gr.outAllTecplot();
         gr.outAllVTK (0);
         coeffs.out.close();
         log (mainDir, watchSteady.elapsedTime, "elapsedTimeSteady", watchSteady.unit);
-        log (mainDir, watchOscAirfoil.elapsedTime, "elapsedTimeOscAirfoil", watchOscAirfoil.unit);
+        //log (mainDir, watchOscAirfoil.elapsedTime, "elapsedTimeOscAirfoil", watchOscAirfoil.unit);
         solSteady.log (gr.logDir);
-        solOscAirfoil.log (gr.logDir);
+        //solOscAirfoil.log (gr.logDir);
         sma.log (gr.logDir);
-        oa.log (gr.logDir);
+        //oa.log (gr.logDir);
         gr.log();
     }
     
-    PetscFinalize();
+    //PetscFinalize();
+    MPI_Finalize();
 
     return 0;
 }

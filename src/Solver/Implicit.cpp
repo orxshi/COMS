@@ -6,7 +6,7 @@ void Solver::impl (Grid& gr)
 
     int rank;
     MPI_Comm_rank (MPI_COMM_WORLD, &rank);
-    
+
     //preSolverCheck (gr);
     
     string dir = gr.outputDir;
@@ -20,7 +20,7 @@ void Solver::impl (Grid& gr)
     {
         gradient.leastSquaresGrad (gr); // parallel
     }
-    
+
     roe.roeflx (gr, limiter, M0, M1, gradient); // parallel
     
     for (nTimeStep=0; nTimeStep<maxTimeStep; ++nTimeStep)
@@ -34,7 +34,8 @@ void Solver::impl (Grid& gr)
                 gauss_seidel (gr); // only fields
                 break;
             case 2:                
-                petsc.solveAxb (gr, M0, M1);                
+                assert(false);
+                //petsc.solveAxb (gr, M0, M1);                
                 break;
             default:
                 cout << "undefined linear solver in Solver::impl(...)" << endl;
