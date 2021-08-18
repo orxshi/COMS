@@ -4,12 +4,14 @@ void Grid::trimWhoHasFringeNeighbor()
 {
     for (int c=n_bou_elm; c<cell.size(); ++c)
     {
+        //assert(c < cell.size());
         Cell& cll = cell[c];
         
         if (cll.iBlank == iBlank_t::FIELD)
         {
             for (const int n: cll.nei)
             {
+                //assert(n < cell.size());
                 const Cell& nei = cell[ n ];
                 
                 if (nei.iBlank == iBlank_t::FRINGE)

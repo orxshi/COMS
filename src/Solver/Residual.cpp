@@ -26,7 +26,8 @@ void Solver::getRes (Grid& gr)
                     for (int i=0; i<N_VAR; ++i)
                     {
                         double RHS = cll.R[i];
-                        res[i] = max( fabs(RHS), res[i] );
+                        //res[i] = max( fabs(RHS), res[i] );
+                        res[i] = max( fabs(cll.cons[i] - cll.old_cons[i]), res[i] );
                     }
                 }
             }

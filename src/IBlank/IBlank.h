@@ -20,5 +20,7 @@ struct Iblank
     void interpolate (Grid& gr, Gradient& gradient);
 };
 
+void read_iblank_from_file(vector<Grid>& grids);
+
 #endif	/* IBLANK_H */
 

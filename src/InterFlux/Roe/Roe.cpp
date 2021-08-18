@@ -377,10 +377,11 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
         qmL  = uL*mx + vL*my + wL*mz;
         HL   = (EL + pL) / rhoL;
 
-        if (primL[0] <= 0.)
-        {
-            std::cout << "primL[0]: " << primL[0] << std::endl;
-        }
+        //if (primL[0] <= 0.)
+        //{
+            //std::cout << "LC.prim[0]: " << LC.prim[0] << std::endl;
+            //std::cout << "primL[0]: " << primL[0] << std::endl;
+        //}
 
         // Right state
         rhoR = primR[0];
@@ -402,6 +403,8 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
 
         if (boutype == face_t::INTERIOR || bc == BC::DIRICHLET)
         {
+            assert(rhoR/rhoL >= 0.);
+
             // Roe-averaged quantities
             RT  = sqrt(rhoR/rhoL);
             rho = RT * rhoL;
@@ -500,6 +503,42 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             R(3,4) = mz;
             R(4,4) = qm;
 
+            //std::cout << "rhoL: " << rhoL << std::endl;
+            //std::cout << "uL: " << uL << std::endl;
+            //std::cout << "vL: " << vL << std::endl;
+            //std::cout << "wL: " << wL << std::endl;
+//
+            //std::cout << "rhoR: " << rhoR << std::endl;
+            //std::cout << "uR: " << uR << std::endl;
+            //std::cout << "vR: " << vR << std::endl;
+            //std::cout << "wR: " << wR << std::endl;
+//
+            //std::cout << "u: " << u << std::endl;
+            //std::cout << "a: " << a << std::endl;
+//
+            //std::cout << "nx: " << nx << std::endl;
+            //std::cout << "ny: " << ny << std::endl;
+            //std::cout << "nz: " << nz << std::endl;
+
+            //std::cout << "lx: " << lx << std::endl;
+            //std::cout << "ly: " << ly << std::endl;
+            //std::cout << "lz: " << lz << std::endl;
+
+            //std::cout << "mx: " << mx << std::endl;
+            //std::cout << "my: " << my << std::endl;
+            //std::cout << "mz: " << mz << std::endl;
+
+            //for (int i=0; i<5; ++i)
+            //{
+                //for (int j=0; j<5; ++j)
+                //{
+                    //std::cout << R(i,j) << " ";
+                //}
+                //std::cout << std::endl;
+            //}
+
+            //assert(false);
+
             /*
             // Right eigenvectors
             R[0][0] = 1.;
@@ -540,9 +579,9 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
                 {
                     //diss[i] += ws[j] * LdU[j] * R[i][j];
                     diss[i] += ws[j] * LdU[j] * R(i,j);
-                    assert(!std::isnan(ws[j]));
-                    assert(!std::isnan(LdU[j]));
-                    assert(!std::isnan(R(i,j)));
+                    //assert(!std::isnan(ws[j]));
+                    //assert(!std::isnan(LdU[j]));
+                    //assert(!std::isnan(R(i,j)));
                 }
             }
 
@@ -591,7 +630,7 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             assert(!std::isnan(flux[iFace][4]));
 
             vel[iFace] = fabs(qn-vb) + a;
-            
+
             //-------------------------------------------------------------
             
             double gsk = 0.5 * gamStar * k / asq;
@@ -718,6 +757,88 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             
             M0[iFace] = M0[iFace] * 0.5 * mg;            
             M1[iFace] = M1[iFace] * 0.5 * mg;
+
+            //std::cout << M0[iFace](0,0) << std::endl;
+            //std::cout << M0[iFace](0,1) << std::endl;
+            //std::cout << M0[iFace](0,2) << std::endl;
+            //std::cout << M0[iFace](0,3) << std::endl;
+            //std::cout << M0[iFace](0,4) << std::endl;
+
+            //std::cout << M1[iFace](0,0) << std::endl;
+            //std::cout << M1[iFace](0,1) << std::endl;
+            //std::cout << M1[iFace](0,2) << std::endl;
+            //std::cout << M1[iFace](0,3) << std::endl;
+            //std::cout << M1[iFace](0,4) << std::endl;
+
+            //std::cout << "rhoL: " << rhoL << std::endl;
+            //std::cout << "rhoR: " << rhoR << std::endl;
+            //std::cout << "vb: " << vb << std::endl;
+            //std::cout << "ws[0]: " << ws[0] << std::endl;
+            //std::cout << "ws[1]: " << ws[1] << std::endl;
+            //std::cout << "ws[2]: " << ws[2] << std::endl;
+            //std::cout << "ws[3]: " << ws[3] << std::endl;
+            //std::cout << "ws[4]: " << ws[4] << std::endl;
+            //std::cout << "qn: " << qn << std::endl;
+            //std::cout << "a: " << a << std::endl;
+            //std::cout << "u: " << u << std::endl;
+            //std::cout << "v: " << v << std::endl;
+            //std::cout << "w: " << w << std::endl;
+            //std::cout << "H: " << H << std::endl;
+            //std::cout << "k: " << k << std::endl;
+            //std::cout << "nx: " << nx << std::endl;
+            //std::cout << "ny: " << ny << std::endl;
+            //std::cout << "nz: " << nz << std::endl;
+            //assert(false);
+
+            /*if (iFace == 119 || iFace == 121 || iFace == 122 || iFace == 123 || iFace == 124 || iFace == 125)
+            {
+                std::cout << "rhoL: " << rhoL << std::endl;
+                std::cout << "uL: " << uL << std::endl;
+                std::cout << "vL: " << vL << std::endl;
+                std::cout << "wL: " << wL << std::endl;
+                std::cout << "pL: " << pL << std::endl;
+                std::cout << "ieL: " << ieL << std::endl;
+                std::cout << "kL: " << kL << std::endl;
+                std::cout << "EL: " << EL << std::endl;
+                std::cout << "HL: " << HL << std::endl;
+                std::cout << "aL: " << aL << std::endl;
+                std::cout << "qnL: " << qnL << std::endl;
+                std::cout << "qlL: " << qlL << std::endl;
+                std::cout << "qmL: " << qmL << std::endl;
+                std::cout << "fluxL[0]: " << fluxL[0] << std::endl;
+                std::cout << "fluxL[1]: " << fluxL[1] << std::endl;
+                std::cout << "fluxL[2]: " << fluxL[2] << std::endl;
+                std::cout << "fluxL[3]: " << fluxL[3] << std::endl;
+                std::cout << "fluxL[4]: " << fluxL[4] << std::endl;
+
+                std::cout << "rhoR: " << rhoR << std::endl;
+                std::cout << "uR: " << uR << std::endl;
+                std::cout << "vR: " << vR << std::endl;
+                std::cout << "wR: " << wR << std::endl;
+                std::cout << "pR: " << pR << std::endl;
+                std::cout << "ieR: " << ieR << std::endl;
+                std::cout << "kR: " << kR << std::endl;
+                std::cout << "ER: " << ER << std::endl;
+                std::cout << "HR: " << HR << std::endl;
+                std::cout << "aR: " << aR << std::endl;
+                std::cout << "qnR: " << qnR << std::endl;
+                std::cout << "qlR: " << qlR << std::endl;
+                std::cout << "qmR: " << qmR << std::endl;
+                std::cout << "fluxR[0]: " << fluxR[0] << std::endl;
+                std::cout << "fluxR[1]: " << fluxR[1] << std::endl;
+                std::cout << "fluxR[2]: " << fluxR[2] << std::endl;
+                std::cout << "fluxR[3]: " << fluxR[3] << std::endl;
+                std::cout << "fluxR[4]: " << fluxR[4] << std::endl;
+                std::cout << "nx: " << nx << std::endl;
+                std::cout << "ny: " << ny << std::endl;
+                std::cout << "nz: " << nz << std::endl;
+
+                std::cout << "flux[0]: " << flux[iFace][0] << std::endl;
+                std::cout << "flux[1]: " << flux[iFace][1] << std::endl;
+                std::cout << "flux[2]: " << flux[iFace][2] << std::endl;
+                std::cout << "flux[3]: " << flux[iFace][3] << std::endl;
+                std::cout << "flux[4]: " << flux[iFace][4] << std::endl;
+            }*/
         }
         else if (bc == BC::SLIP_WALL)
         {
@@ -782,6 +903,56 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             M(4,4) = 1.;            
             
             M0[iFace] = (M1[iFace] * M) + M0[iFace];
+
+            /*if (iFace == 119 || iFace == 121 || iFace == 122 || iFace == 123 || iFace == 124 || iFace == 125)
+            {
+                std::cout << "rhoL: " << rhoL << std::endl;
+                std::cout << "uL: " << uL << std::endl;
+                std::cout << "vL: " << vL << std::endl;
+                std::cout << "wL: " << wL << std::endl;
+                std::cout << "pL: " << pL << std::endl;
+                std::cout << "ieL: " << ieL << std::endl;
+                std::cout << "kL: " << kL << std::endl;
+                std::cout << "EL: " << EL << std::endl;
+                std::cout << "HL: " << HL << std::endl;
+                std::cout << "aL: " << aL << std::endl;
+                std::cout << "qnL: " << qnL << std::endl;
+                std::cout << "qlL: " << qlL << std::endl;
+                std::cout << "qmL: " << qmL << std::endl;
+                std::cout << "fluxL[0]: " << fluxL[0] << std::endl;
+                std::cout << "fluxL[1]: " << fluxL[1] << std::endl;
+                std::cout << "fluxL[2]: " << fluxL[2] << std::endl;
+                std::cout << "fluxL[3]: " << fluxL[3] << std::endl;
+                std::cout << "fluxL[4]: " << fluxL[4] << std::endl;
+
+                std::cout << "rhoR: " << rhoR << std::endl;
+                std::cout << "uR: " << uR << std::endl;
+                std::cout << "vR: " << vR << std::endl;
+                std::cout << "wR: " << wR << std::endl;
+                std::cout << "pR: " << pR << std::endl;
+                std::cout << "ieR: " << ieR << std::endl;
+                std::cout << "kR: " << kR << std::endl;
+                std::cout << "ER: " << ER << std::endl;
+                std::cout << "HR: " << HR << std::endl;
+                std::cout << "aR: " << aR << std::endl;
+                std::cout << "qnR: " << qnR << std::endl;
+                std::cout << "qlR: " << qlR << std::endl;
+                std::cout << "qmR: " << qmR << std::endl;
+                std::cout << "fluxR[0]: " << fluxR[0] << std::endl;
+                std::cout << "fluxR[1]: " << fluxR[1] << std::endl;
+                std::cout << "fluxR[2]: " << fluxR[2] << std::endl;
+                std::cout << "fluxR[3]: " << fluxR[3] << std::endl;
+                std::cout << "fluxR[4]: " << fluxR[4] << std::endl;
+                std::cout << "nx: " << nx << std::endl;
+                std::cout << "ny: " << ny << std::endl;
+                std::cout << "nz: " << nz << std::endl;
+
+                std::cout << "flux[0]: " << flux[iFace][0] << std::endl;
+                std::cout << "flux[1]: " << flux[iFace][1] << std::endl;
+                std::cout << "flux[2]: " << flux[iFace][2] << std::endl;
+                std::cout << "flux[3]: " << flux[iFace][3] << std::endl;
+                std::cout << "flux[4]: " << flux[iFace][4] << std::endl;
+            }*/
         }
         else if (bc == BC::EMPTY)
         {
@@ -797,6 +968,26 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             flux[iFace][3] *= mg;
             flux[iFace][4] *= mg;
 
+            //std::cout << "nx: " << nx << std::endl;
+            //std::cout << "ny: " << ny << std::endl;
+            //std::cout << "nz: " << nz << std::endl;
+
+            //std::cout << "rhoR: " << rhoR << std::endl;
+            //std::cout << "qnR: " << qnR << std::endl;
+            //std::cout << "pR: " << pR << std::endl;
+            //std::cout << "vb: " << vb << std::endl;
+            //std::cout << "uR: " << uR << std::endl;
+            //std::cout << "vR: " << vR << std::endl;
+            //std::cout << "wR: " << wR << std::endl;
+
+            //std::cout << "flux: " << flux[iFace][0] << std::endl;
+            //std::cout << "flux: " << flux[iFace][1] << std::endl;
+            //std::cout << "flux: " << flux[iFace][2] << std::endl;
+            //std::cout << "flux: " << flux[iFace][3] << std::endl;
+            //std::cout << "flux: " << flux[iFace][4] << std::endl;
+
+            //assert(false);
+
             assert(!std::isnan(flux[iFace][0]));
             assert(!std::isnan(flux[iFace][1]));
             assert(!std::isnan(flux[iFace][2]));
@@ -809,6 +1000,56 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
             
             M0[iFace] = jacob(consL, n, vb);            
             M0[iFace] = M0[iFace] * 2. * mg;
+
+            /*if (iFace == 119 || iFace == 121 || iFace == 122 || iFace == 123 || iFace == 124 || iFace == 125)
+            {
+                std::cout << "rhoL: " << rhoL << std::endl;
+                std::cout << "uL: " << uL << std::endl;
+                std::cout << "vL: " << vL << std::endl;
+                std::cout << "wL: " << wL << std::endl;
+                std::cout << "pL: " << pL << std::endl;
+                std::cout << "ieL: " << ieL << std::endl;
+                std::cout << "kL: " << kL << std::endl;
+                std::cout << "EL: " << EL << std::endl;
+                std::cout << "HL: " << HL << std::endl;
+                std::cout << "aL: " << aL << std::endl;
+                std::cout << "qnL: " << qnL << std::endl;
+                std::cout << "qlL: " << qlL << std::endl;
+                std::cout << "qmL: " << qmL << std::endl;
+                std::cout << "fluxL[0]: " << fluxL[0] << std::endl;
+                std::cout << "fluxL[1]: " << fluxL[1] << std::endl;
+                std::cout << "fluxL[2]: " << fluxL[2] << std::endl;
+                std::cout << "fluxL[3]: " << fluxL[3] << std::endl;
+                std::cout << "fluxL[4]: " << fluxL[4] << std::endl;
+
+                std::cout << "rhoR: " << rhoR << std::endl;
+                std::cout << "uR: " << uR << std::endl;
+                std::cout << "vR: " << vR << std::endl;
+                std::cout << "wR: " << wR << std::endl;
+                std::cout << "pR: " << pR << std::endl;
+                std::cout << "ieR: " << ieR << std::endl;
+                std::cout << "kR: " << kR << std::endl;
+                std::cout << "ER: " << ER << std::endl;
+                std::cout << "HR: " << HR << std::endl;
+                std::cout << "aR: " << aR << std::endl;
+                std::cout << "qnR: " << qnR << std::endl;
+                std::cout << "qlR: " << qlR << std::endl;
+                std::cout << "qmR: " << qmR << std::endl;
+                std::cout << "fluxR[0]: " << fluxR[0] << std::endl;
+                std::cout << "fluxR[1]: " << fluxR[1] << std::endl;
+                std::cout << "fluxR[2]: " << fluxR[2] << std::endl;
+                std::cout << "fluxR[3]: " << fluxR[3] << std::endl;
+                std::cout << "fluxR[4]: " << fluxR[4] << std::endl;
+                std::cout << "nx: " << nx << std::endl;
+                std::cout << "ny: " << ny << std::endl;
+                std::cout << "nz: " << nz << std::endl;
+
+                std::cout << "flux[0]: " << flux[iFace][0] << std::endl;
+                std::cout << "flux[1]: " << flux[iFace][1] << std::endl;
+                std::cout << "flux[2]: " << flux[iFace][2] << std::endl;
+                std::cout << "flux[3]: " << flux[iFace][3] << std::endl;
+                std::cout << "flux[4]: " << flux[iFace][4] << std::endl;
+            }*/
         }
 
         assert(!std::isnan(flux[iFace][0]));
@@ -816,6 +1057,7 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
         assert(!std::isnan(flux[iFace][2]));
         assert(!std::isnan(flux[iFace][3]));
         assert(!std::isnan(flux[iFace][4]));
+
     }
     
     // gather face.M, vel, flux
@@ -860,6 +1102,16 @@ void Roe::roeflx (Grid& gr, Limiter& limiter, vector <Matrixd<N_VAR,N_VAR>>& M0,
                 cout << "neither LC nor RC in roeflx" << endl;
                 exit(-2);
             }
+
+            //if (ic == 222)
+            //{
+                //std::cout << "f: " << f << std::endl;
+                //std::cout << "fluxxx[0]: " << flux[f][0] << std::endl;
+                //std::cout << "fluxxx[1]: " << flux[f][1] << std::endl;
+                //std::cout << "fluxxx[2]: " << flux[f][2] << std::endl;
+                //std::cout << "fluxxx[3]: " << flux[f][3] << std::endl;
+                //std::cout << "fluxxx[4]: " << flux[f][4] << std::endl;
+            //}
         }
     }
 }

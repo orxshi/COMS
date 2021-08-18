@@ -98,6 +98,21 @@ inline void common2 (Cell& e, const vector<Face>& face, vector<Cell>& cell)
 inline void common (Cell& e, const vector<Face>& face, vector<Cell>& cell, const vector <Matrixd<N_VAR,N_VAR>>& M0, const vector <Matrixd<N_VAR,N_VAR>>& M1)
 {
     invertMat5(e.D, e.R, e.dQ); // dQ = inv(D) * res
+
+    //std::cout << "R" << std::endl;
+    //std::cout << e.R[0] << " " << e.R[1] << " " << e.R[2] << " " << e.R[3] << " " << e.R[4] << " " << std::endl;
+
+    //std::cout << "D" << std::endl;
+    //std::cout << e.D(0,0) << " " << e.D(0,1) << " " << e.D(0,2) << " " << e.D(0,3) << " " << e.D(0,4) << " " << std::endl;
+    //std::cout << e.D(1,0) << " " << e.D(1,1) << " " << e.D(1,2) << " " << e.D(1,3) << " " << e.D(1,4) << " " << std::endl;
+    //std::cout << e.D(2,0) << " " << e.D(2,1) << " " << e.D(2,2) << " " << e.D(2,3) << " " << e.D(2,4) << " " << std::endl;
+    //std::cout << e.D(3,0) << " " << e.D(3,1) << " " << e.D(3,2) << " " << e.D(3,3) << " " << e.D(3,4) << " " << std::endl;
+    //std::cout << e.D(4,0) << " " << e.D(4,1) << " " << e.D(4,2) << " " << e.D(4,3) << " " << e.D(4,4) << " " << std::endl;
+
+    //std::cout << "dQ" << std::endl;
+    //std::cout << e.dQ[0] << " " << e.dQ[1] << " " << e.dQ[2] << " " << e.dQ[3] << " " << e.dQ[4] << " " << std::endl;
+
+    //assert(false);
     
     Vector<N_VAR> ddQ = e.dQ - e.old_dQ;
 
@@ -132,6 +147,10 @@ void Solver::diff_to_cons_prim(Grid& g)
         if (e.iBlank == iBlank_t::FIELD)
         {
             e.cons += e.dQ;
+            //if (e.dQ[0] > 1)
+            //{
+                //assert(false);
+            //}
             e.cons_to_prim();
         }
     }

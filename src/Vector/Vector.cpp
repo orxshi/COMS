@@ -2,6 +2,7 @@
 
 double dotP (const Vector<3>& V1, const Vector<3>& V2)
 {
+    //////
     double tmp;
     
     tmp = V1[0] * V2[0]

@@ -18,6 +18,17 @@ void Solver::updateVars (Grid& gr)
                 cll.cons[i] += dt * cll.R[i] / cll.vol;
             }
 
+            /*if (cll.R[0] > 150)
+            {
+                std::cout << "cll.R[0]: " << cll.R[0] << std::endl;
+                std::cout << "cll.R[1]: " << cll.R[1] << std::endl;
+                std::cout << "cll.R[2]: " << cll.R[2] << std::endl;
+                std::cout << "cll.R[3]: " << cll.R[3] << std::endl;
+                std::cout << "cll.R[4]: " << cll.R[4] << std::endl;
+
+                std::cout << "c: " << c << std::endl;
+            }*/
+
             /*if (cll.cons[0] < 0.)
             {
                 std::cout << "dt: " << dt << std::endl;
@@ -41,6 +52,8 @@ void Solver::updateVars (Grid& gr)
         
         cll.cons_to_prim();
     }
+
+    //assert(false);
 }
 
 double Solver::setExpRes (Grid& gr)
@@ -92,7 +105,6 @@ double Solver::setExpRes (Grid& gr)
                         res[i] += pow(RHS, 2);
                         assert(!std::isnan(RHS));
                         assert(!std::isnan(res[i]));
-                        //std::cout << "RHS: " << RHS << " " << res[i] << std::endl;
                     }
                 }
             }
@@ -111,6 +123,12 @@ double Solver::setExpRes (Grid& gr)
                         double RHS = cll.R[i];
 
                         res[i] += pow(LHS - RHS, 2);
+                        //if (RHS > 10)
+                        //{
+                            //std::cout << "RHS: " << RHS << std::endl;
+                            //std::cout << "cell: " << c-gr.n_bou_elm << std::endl;
+                            //assert(false);
+                        //}
                     }
                 }
             }
@@ -230,7 +248,7 @@ void Solver::expl (Grid& gr)
         
         //roeflx (gr);
         roe.roeflx (gr, limiter, M0, M1, gradient); // parallel
-         
+
         updateVars(gr);
         gr.apply_BCs();        
         
@@ -247,7 +265,7 @@ void Solver::expl (Grid& gr)
         outRes(gr.outputDir);
         
         if (aveRes < tol)
-        //if (steady && fabs(aveRes) < tol)
+        //if ((steady && fabs(aveRes) < tol))
         {
             break;
         }

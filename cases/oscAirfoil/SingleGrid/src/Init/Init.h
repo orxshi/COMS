@@ -12,6 +12,7 @@ struct OscInit:Init
    	
     void read();
     void init (Grid& gr);
+    void init_sod (Grid& gr);
     void print();
     void log (string dir);
 };

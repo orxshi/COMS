@@ -21,8 +21,15 @@ void Solver::impl (Grid& gr)
         gradient.leastSquaresGrad (gr); // parallel
     }
 
+    for (int v: gr.cell[gr.n_bou_elm].vtx)
+    {
+        std::cout << gr.pt[v].dim[0] << std::endl;
+        std::cout << gr.pt[v].dim[1] << std::endl;
+        std::cout << gr.pt[v].dim[2] << std::endl;
+    }
+
     roe.roeflx (gr, limiter, M0, M1, gradient); // parallel
-    
+
     for (nTimeStep=0; nTimeStep<maxTimeStep; ++nTimeStep)
     {
         wInne.start();
@@ -49,7 +56,7 @@ void Solver::impl (Grid& gr)
         if (rank == MASTER_RANK) { outRes(gr.outputDir); }
         gr.apply_BCs();
         
-        if (verbose && rank == MASTER_RANK && nTimeStep%printThres==0)
+        //if (verbose && rank == MASTER_RANK && nTimeStep%printThres==0)
         {
             cout << left << setw(10) << fixed << setprecision(5) << time;
             cout << setw(10) << nTimeStep;

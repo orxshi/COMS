@@ -118,7 +118,7 @@ namespace AFT
     extern void eraseExistingEdgeFromFrontList (int ie, vector<FrontMember>& frontList);
     extern void advanceFront (vector<FrontMember>& frontList, vector<Point>& points, double aveTriArea,
                        vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT,
-                       PointADT& pointADT, PointADT& edgeCenterADT, EdgeADT& edgeADT, EdgeADT& edge01ADT, int newGridId, vector<Point>& edgeCenters, CircleADT& circleADT);
+                       PointADT& pointADT, PointADT& edgeCenterADT, EdgeADT& edgeADT, EdgeADT& edge01ADT, int newGridId, vector<Point>& edgeCenters, CircleADT& circleADT, int countr);
     
     // Edge
     extern Edge createEdge (int indexA, int indexB, int belonging, bool newlyCreated);
@@ -168,6 +168,7 @@ namespace AFT
     extern bool checkCircumBound (const Point& CPX, const Point& A, const Point& B, double rho);    
     extern void ptCCInter (int baseEdge, const int iCPX, int newGridId, vector <int>& edgesAddedToFront, CircleADT& circleADT, TriangleADT& triangleADT, vector<Triangle>& triangles, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, vector<Point>& points, PointADT& pointADT);
     extern void eraseDeadPoints (vector<Point>& points, vector<Edge>& edges, vector<Triangle>& triangles);
+    extern void erasePoint (int ID, vector<Point>& points, vector<Edge>& edges, vector<Triangle>& triangles);
     extern double normalDisp (const CVector& vt0, const CVector& vt1, double aveTriSize);
     
     // New Grid
@@ -179,7 +180,7 @@ namespace AFT
     extern void createFinalGrid (Grid& finalGrid, const vector<Grid>& gr, const Grid& newGrid);
     
     // AFT
-    extern void aft (vector<Grid>& gr, Grid& finalGrid);
+    extern void aft (vector<Grid>& gr, Grid& finalGrid, int countr);
     extern void construct (int iCPX, bool A_CPX_exists, bool B_CPX_exists, int iA_CPX, int iB_CPX, int iA, int iB, vector<FrontMember>& frontList,
              vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, vector<Point>& points, CircleADT& circleADT, int iFrontEdge);
     extern void exportToGMSH (const vector<Point>& points, const vector<Edge>& mesh0Edges, const vector<Edge>& mesh1Edges, string dir);

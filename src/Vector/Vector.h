@@ -10,6 +10,8 @@
 
 #include <array>
 #include <cmath>
+#include <iostream>
+#include <cassert>
 #include "../Constants.h"
 
 using std::array;
@@ -84,8 +86,32 @@ template<size_t s> double mag(const Vector<s>& V)
     {
         mg += pow(V[i],2);
     }
+
+    mg = sqrt(mg);
+
+    return mg;
+}
+template<size_t s> double maggg(const Vector<s>& V)
+{
+    double mg = 0.;
+
+    std::cout << "mg initial: " << mg << std::endl;
+    std::cout << "s: " << s << std::endl;
+
+    for (int i=0; i<s; ++i)
+    {
+        std::cout << "V[i]: " << V[i] << std::endl;
+
+        mg += pow(V[i],2);
+
+        std::cout << "mg: " << mg << std::endl;
+    }
+
+    std::cout << "mg1: " << mg << std::endl;
     
     mg = sqrt(mg);
+
+    std::cout << "mg2: " << mg << std::endl;
     
     return mg;
 }

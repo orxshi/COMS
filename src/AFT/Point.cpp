@@ -125,7 +125,7 @@ namespace AFT
         Point& t0 = points[it0];
         Point& t1 = points[it1];        
         double d = mag (t0.dim - t1.dim);
-        double srchRegion = rho;
+        double srchRegion = 2.*rho;
         
         CVector range1;
         range1[0] = min (t0.dim[0], t1.dim[0]);
@@ -151,6 +151,17 @@ namespace AFT
             cout << "pointADT.ids.size() == 0 in AFT::srchCandPts(...)" << endl;
             return false;
         }
+
+            //if (countr == 36)
+            {
+                if (it0 == 208 && it1 == 211)
+                {
+                    for (auto aa: pointADT.ids)
+                    {
+                        cout << "ids: " << aa << endl;
+                    }
+                }
+            }
         
         candPts.clear();
         
@@ -158,6 +169,9 @@ namespace AFT
         
         for (int i=0; i<pointADT.ids.size(); ++i)
         {
+            if (!points[pointADT.ids[i]].alive) {
+                continue;
+            }
             //cout << "pointADT.ids[i] = " << pointADT.ids[i] << endl;
             
             const Point& p = points [pointADT.ids[i]];
@@ -210,7 +224,7 @@ namespace AFT
                 }                
             }
         }
-        
+
         if (candPts.size() == 0)
         {
             cout << "no cand points found in AFT::srchCandPts(...)" << endl;
@@ -351,6 +365,21 @@ namespace AFT
 
         crP1.dim = center + (s * normal1);
         crP2.dim = center + (s * normal2);
+
+        //cout << "crP1.dim[0]: " << crP1.dim[0] << endl;
+        //cout << "crP1.dim[1]: " << crP1.dim[1] << endl;
+
+        //cout << "crP2.dim[0]: " << crP2.dim[0] << endl;
+        //cout << "crP2.dim[1]: " << crP2.dim[1] << endl;
+
+        //cout << "center[0]" << center[0] << endl;
+        //cout << "center[1]" << center[1] << endl;
+
+        //cout << "normal1[0]" << normal1[0] << endl;
+        //cout << "normal1[1]" << normal1[1] << endl;
+
+        //cout << "normal2[0]" << normal2[0] << endl;
+        //cout << "normal2[1]" << normal2[1] << endl;
         
         // step_1
         if (rayCasting (crP1, edge01ADT))
@@ -447,6 +476,7 @@ namespace AFT
     {
         bool tempBool;
         
+        p.id = points.size();
         points.push_back(p);
         ADT::ADTPoint vec = pointADT.createADTPoint (p.dim, p.dim);
         vec.idx = points.size() - 1;
@@ -851,6 +881,9 @@ namespace AFT
     {
         //--check A_CPX-----------------------------------------------------
         bool A_CPX_intersects = checkEdgeIntersection (A, CPX, edgeADT, edges, points, A_CPX_exists, iA_CPX);
+
+        //cout << "A_CPX_intersects: " << A_CPX_intersects << endl;
+        //cout << "A_CPX_exists: " << A_CPX_exists << endl;
         
         if (A_CPX_intersects)
         {
@@ -863,6 +896,9 @@ namespace AFT
         
         //--check B_CPX-----------------------------------------------------
         bool B_CPX_intersects = checkEdgeIntersection (B, CPX, edgeADT, edges, points, B_CPX_exists, iB_CPX);
+
+        //cout << "B_CPX_intersects: " << A_CPX_intersects << endl;
+        //cout << "B_CPX_exists: " << A_CPX_exists << endl;
         
         if (B_CPX_intersects)
         {
@@ -883,14 +919,30 @@ namespace AFT
     {
         CVector cnt;
         double radius;
+
+        if (A.dim[0] == B.dim[0] && A.dim[1] == B.dim[1])
+        {
+            assert(false);
+        }
+        
+        if (A.dim[0] == CPX.dim[0] && A.dim[1] == CPX.dim[1])
+        {
+            assert(false);
+        }
+        
+        if (B.dim[0] == CPX.dim[0] && B.dim[1] == CPX.dim[1])
+        {
+            assert(false);
+        }
         
         triPtsCircums (A.dim, B.dim, CPX.dim, cnt, radius);
         
-        if (radius > rho)
+        //if (radius > rho)
+        if (radius > (2. * rho))
         {
-            //cout << "!inCircumBound in AFT::checkCircumBound(...)" << endl;
-            //cout << "rho = " << rho << endl;
-            //cout << "radius = " << radius << endl;            
+            cout << "!inCircumBound in AFT::checkCircumBound(...)" << endl;
+            cout << "rho = " << rho << endl;
+            cout << "radius = " << radius << endl;            
             return false;
         }
         
@@ -927,6 +979,68 @@ namespace AFT
         }
         
         return false;
+    }
+
+    void erasePoint (int ID, vector<Point>& points, vector<Edge>& edges, vector<Triangle>& triangles)
+    {
+        for (int ip=0; ip<points.size(); ++ip)
+        {
+            Point& p = points[ip];
+            
+            p.id = ip;
+        }
+        
+        points.erase (remove_if (points.begin(), points.end(), [=](Point& p) { return p.id == ID; }), points.end());
+        
+        /*for (int ip=0; ip<points.size(); ++ip)
+        {
+            Point& p = points[ip];
+        
+            if (p.alive == false)
+            {
+                points.erase(points.begin() + ip);
+            }
+        }*/
+        
+        for (int ip=0; ip<points.size(); ++ip)
+        {
+            Point& p = points[ip];
+            
+            for (int e: p.e)
+            {            
+                Edge& edge = edges[e];
+                
+                for (int ee=0; ee<edge.t.size(); ++ee)
+                {
+                    if (edge.t[ee] == p.id)
+                    {
+                        edge.t[ee] = ip;
+                        break;
+                    }
+                }
+            }
+            
+            for (int t: p.tri)
+            {            
+                Triangle& tri = triangles[t];
+                
+                for (int pp=0; pp<tri.p.size(); ++pp)
+                {
+                    if (tri.p[pp] == p.id)
+                    {
+                        tri.p[pp] = ip;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        for (int ip=0; ip<points.size(); ++ip)
+        {
+            Point& p = points[ip];
+            
+            p.id = ip;
+        }
     }
     
     void eraseDeadPoints (vector<Point>& points, vector<Edge>& edges, vector<Triangle>& triangles)

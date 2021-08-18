@@ -17,7 +17,12 @@ void Solver::interflux (Grid& gr)
                 {
                     for (int i=0; i<N_VAR; ++i)
                     {
+                        //std::cout << "e.D(0,0)b: " << e.D(0,0) << std::endl;
+                        //std::cout << "volume: " << e.vol << std::endl;
+                        //std::cout << "dTao: " << dTao << std::endl;
                         e.D(i,i) += e.vol / dTao;
+                        //std::cout << "e.D(0,0)a: " << e.D(0,0) << std::endl;
+                        //assert(false);
                     }
                 }
                 else

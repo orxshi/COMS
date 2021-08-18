@@ -14,7 +14,7 @@
 int main(int argc, char** argv)
 {
     //PetscInitialize (&argc, &argv, NULL, NULL);
-    MPI_Init(NULL, NULL);
+    //MPI_Init(NULL, NULL);
     
     Watch watchSteady;
     Watch watchOscAirfoil;
@@ -64,66 +64,66 @@ int main(int argc, char** argv)
     grs[0].outAllVTK (0);
     grs[1].outAllVTK (0);
 
-    // solvers
-    array<Solver,2> solver = { Solver(grs[0], "SOLVER-STEADY-AG"), Solver(grs[1], "SOLVER-STEADY-BG") };    
-    solver[0].read ("Solver/solSteady.dat");
-    solver[1].read ("Solver/solSteady.dat");
-    
-    // moving airfoil object
-    SMAirfoil sma (solver[0].dt);
-    sma.read ("MovingGrid/smAirfoil.dat");
-    
-    int nActiveElms = 0;
-    for (int g=0; g<grs.size(); ++g)
-    {
-        for (const Cell& cll: grs[g].cell)
-        {
-            if (cll.iBlank == iBlank_t::FIELD)
-            {
-                ++nActiveElms;
-            }
-        }
-    }
-    log (mainDir, nActiveElms, "nActiveElms", "");
-    cout << "nActiveElms = " << nActiveElms << endl;
-    
-    watchSteady.start();
-    double err0 = BIG_POS_NUM;
-    double err1 = BIG_POS_NUM;
-    solver[0].maxTimeStep = 1;
-    solver[1].maxTimeStep = 1;
-    double oversetTol = 1e-12;
-    while (err0 > oversetTol || err1 > oversetTol)    
-    {
-        for (int g=0; g<grs.size(); ++g)
-        {
-            sma.getAllFaceVelocities (grs[g]);
-            
-            (solver[g].implicit) ? solver[g].impl(grs[g]) : solver[g].expl(grs[g]);
-            
-            //grs[1-g].interpolate();
-            iblank.interpolate (grs[1-g], solver[g].gradient);
+    //// solvers
+    //array<Solver,2> solver = { Solver(grs[0], "SOLVER-STEADY-AG"), Solver(grs[1], "SOLVER-STEADY-BG") };    
+    //solver[0].read ("Solver/solSteady.dat");
+    //solver[1].read ("Solver/solSteady.dat");
+    //
+    //// moving airfoil object
+    //SMAirfoil sma (solver[0].dt);
+    //sma.read ("MovingGrid/smAirfoil.dat");
+    //
+    //int nActiveElms = 0;
+    //for (int g=0; g<grs.size(); ++g)
+    //{
+    //    for (const Cell& cll: grs[g].cell)
+    //    {
+    //        if (cll.iBlank == iBlank_t::FIELD)
+    //        {
+    //            ++nActiveElms;
+    //        }
+    //    }
+    //}
+    //log (mainDir, nActiveElms, "nActiveElms", "");
+    //cout << "nActiveElms = " << nActiveElms << endl;
+    //
+    //watchSteady.start();
+    //double err0 = BIG_POS_NUM;
+    //double err1 = BIG_POS_NUM;
+    //solver[0].maxTimeStep = 1;
+    //solver[1].maxTimeStep = 1;
+    //double oversetTol = 1e-12;
+    //while (err0 > oversetTol || err1 > oversetTol)    
+    //{
+    //    for (int g=0; g<grs.size(); ++g)
+    //    {
+    //        sma.getAllFaceVelocities (grs[g]);
+    //        
+    //        (solver[g].implicit) ? solver[g].impl(grs[g]) : solver[g].expl(grs[g]);
+    //        
+    //        //grs[1-g].interpolate();
+    //        iblank.interpolate (grs[1-g], solver[g].gradient);
 
-            sma.getAllFaceVelocities (grs[1-g]);
-            
-            err0 = solver[1-g].setExpRes (grs[1-g]);
-            err1 = solver[g].setExpRes (grs[g]);
-        }
-        
-        cout << "err0 = " << err0 << endl;
-        cout << "err1 = " << err1 << endl;
-    }
-    watchSteady.stop();
-    log (mainDir, watchSteady.elapsedTime, "elapsedTimeSteady", watchSteady.unit);
-    
-    //solver[0].petsc.finalize();
-    //solver[1].petsc.finalize();
-    
-    grs[0].outAllVTK (0);
-    grs[1].outAllVTK (0);
-    
-    //PetscFinalize();
-    MPI_Finalize();
+    //        sma.getAllFaceVelocities (grs[1-g]);
+    //        
+    //        err0 = solver[1-g].setExpRes (grs[1-g]);
+    //        err1 = solver[g].setExpRes (grs[g]);
+    //    }
+    //    
+    //    cout << "err0 = " << err0 << endl;
+    //    cout << "err1 = " << err1 << endl;
+    //}
+    //watchSteady.stop();
+    //log (mainDir, watchSteady.elapsedTime, "elapsedTimeSteady", watchSteady.unit);
+    //
+    ////solver[0].petsc.finalize();
+    ////solver[1].petsc.finalize();
+    //
+    //grs[0].outAllVTK (0);
+    //grs[1].outAllVTK (0);
+    //
+    ////PetscFinalize();
+    //MPI_Finalize();
 
     return 0;
 }

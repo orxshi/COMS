@@ -109,6 +109,7 @@ struct Grid
     double setExpRes();
     void printInput();
     void printMeshInfo();
+    Cell& internal_cell(int cellphys);
 
     // Public Methods
     void readInput();    

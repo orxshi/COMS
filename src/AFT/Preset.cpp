@@ -13,6 +13,8 @@ namespace AFT
             {
                 //if (f.bouType == face_t::INTERIOR)
                 //{
+                assert(f.nei[0] < gr[g].cell.size());
+                assert(f.nei[1] < gr[g].cell.size());
                     const Cell& L = gr[g].cell[f.nei[0]];
                     const Cell& R = gr[g].cell[f.nei[1]];
 
@@ -26,6 +28,7 @@ namespace AFT
                             for (const int iv: f.vtx)
                             {
                                 Point v;
+                                assert(iv < gr[g].pt.size());
                                 v.dim = gr[g].pt[iv].dim;
                                 v.belonging = gr[g].pt[iv].belonging;
                                 //v.belonging = newGridId;

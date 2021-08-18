@@ -1,6 +1,63 @@
 #include "../Grid/Grid.h"
 #include "IBlank.h"
 
+void read_iblank_from_file(vector<Grid>& grids)
+{
+    for (Grid& grid: grids)
+    {
+        std::ifstream file;
+        std::string fn = "iblank_rank0_mesh";
+        fn.append(std::to_string(grid.id));
+        fn.append(".dat");
+        file.open(fn);
+        assert(file.is_open());
+
+        std::string temps;
+        std::string iblank;
+        int phys;
+        int donor_mesh;
+        int donor_cell;
+        int tempi;
+
+        getline(file, temps);
+        file >> phys;
+
+        Cell& cll = grid.internal_cell(phys);
+
+        file >> iblank;
+        if (iblank == "field") {
+            cll.iBlank = iBlank_t::FIELD;
+        }
+        else if (iblank == "receptor") {
+            cll.iBlank = iBlank_t::FRINGE;
+        }
+        else if (iblank == "hole") {
+            cll.iBlank = iBlank_t::HOLE;
+        }
+        else {
+            assert(false);
+        }
+        file >> donor_mesh;
+        if (donor_mesh != -1)
+        {
+            assert(donor_mesh != grid.id);
+
+            for (Grid& donor_grid: grids)
+            {
+                if (donor_grid.id == donor_mesh)
+                {
+                    file >> donor_cell;
+                    cll.donor = &donor_grid.internal_cell(donor_cell);
+                }
+            }
+        }
+        else
+        {
+            file >> tempi;
+        }
+    }
+}
+
 void Grid::CellADT::build (const Grid& gr)
 {
     points.resize (gr.n_in_elm);

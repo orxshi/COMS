@@ -1,5 +1,18 @@
 #include "Grid.h"
 
+Cell& Grid::internal_cell(int cellphys)
+{
+    for (int i=n_bou_elm; i<n_in_elm; ++i)
+    {
+        if (cell[i].phys == cellphys)
+        {
+            return cell[i];
+        }
+    }
+
+    assert(false);
+}
+
 Grid::~Grid ()
 {    
     cellADT.destroy_tree();    

@@ -82,10 +82,6 @@ void MovingGrid::getFaceVelocity(Face& f)
     areaSwept *= 0.5;
 
     f.vb = (areaSwept / dt / edgeLength) * faceNorm;
-    /*cout << areaSwept << endl;
-    cout << dt << endl;
-    cout << edgeLength << endl;
-    exit(-2);*/
 }
 
 void MovingGrid::checkGCL(const Grid& gr)

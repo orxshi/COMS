@@ -35,7 +35,7 @@ struct Cell
 {
     // Fields
     int phys;
-    Cell* donor;
+    Cell* donor; // this has to be changed in the future for parallel prog.
     vector<Cell*> receiver;
     iBlank_t iBlank;
     int belonging;

@@ -702,6 +702,7 @@ namespace AFT
         ngfc.build();
         
         
+        cout << "test in final grid" << endl;
         
         // add boundary elements which are attached to field and untrimmed cells        
         for (const Grid& g: gr)

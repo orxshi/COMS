@@ -1,7 +1,8 @@
 linearSolverType 1
-cfl 20.0
+cfl 20
 steady 1
 sOrder 1
 tOrder 1
 nSampleImpl 3
 nSampleInne 3
+implicit 1

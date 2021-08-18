@@ -174,9 +174,13 @@ namespace AFT
         newGrid.n_in_elm = newGrid.totalNElms - newGrid.n_bou_elm;
         //newGrid.cell.resize( newGrid.totalNElms ); // better to reserve and push_back
         newGrid.cell.reserve (newGrid.totalNElms);
+
+        cout << "creating boundary elements" << flush;
         
         createBoundaryElements (0, points, points2, newGrid, triangles, phys, newGridId, ptsExist, iGridPt);
         createBoundaryElements (triangles.size(), points, points2, newGrid, triangles, phys, newGridId, ptsExist, iGridPt);
+
+        cout << "done!" << endl;
 
         // cells
         for (int t=newGrid.n_bou_elm; t<newGrid.totalNElms; ++t)

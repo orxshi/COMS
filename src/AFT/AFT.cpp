@@ -2,8 +2,9 @@
 
 namespace AFT
 {
-    void aft (vector<Grid>& gr, Grid& finalGrid)
+    void aft (vector<Grid>& gr, Grid& finalGrid, int countr)
     {
+        cout << "AFT 0000" << endl;
         //cout << "Allocating... " << flush;
         int newGridId = 2;        
         double offsetZ = 1.;
@@ -26,28 +27,39 @@ namespace AFT
         PointADT edgeCenterADT;
         CircleADT circleADT;
         //cout << "done!" << endl;
+
+        cout << "AFT bbbb" << endl;
         
         // this should not be in AFT
         //cout << "Trimming/Re-blanking... " << flush;
         gr[0].trimWhoHasFringeNeighbor();
         gr[1].trimWhoHasFringeNeighbor();
+        cout << "AFT cccc" << endl;
         gr[0].trimWhoHasTrimNeighbor (3);
         gr[1].trimWhoHasTrimNeighbor (2);
         //cout << "done!" << endl;
+
+        cout << "AFT dddd" << endl;
         
         // this too
         //cout << "Outputing after trimming/reblanking... " << flush;
         //gr[0].outAllTecplot();
         //gr[1].outAllTecplot();
-        gr[0].outAllVTK(0);
-        gr[1].outAllVTK(0);
+        gr[0].outAllVTK(99);
+        gr[1].outAllVTK(99);
         //cout << "done!" << endl;
+
+        cout << "AFT 1111" << endl;
      
         //cout << "Preparing... " << flush;
         setPointsEdges (gr, points, edges, edgeCenters, newGridId);
+        cout << "AFT 2222" << endl;
         createFrontList (edges, frontList, points);
+        cout << "AFT 3333" << endl;
         aveTriArea = getAveTriArea (edges, points);
         //cout << "done!" << endl;
+
+        cout << "AFT 4444" << endl;
         
         //cout << "Building trees... " << flush;        
         for (Edge& e: edges)
@@ -62,6 +74,8 @@ namespace AFT
             }
         }
         
+        cout << "AFT 1" << endl;
+        
         edge0ADT.build (points, mesh0Edges);
         edge1ADT.build (points, mesh1Edges);
         edgeADT.build (points, edges);
@@ -71,52 +85,68 @@ namespace AFT
         edgeCenterADT.build (edgeCenters);
         circleADT.build (edgeADT);
         //cout << "done!" << endl;
+
+        cout << "AFT 2" << endl;
         
         //cout << "Exporting to GMSH... " << flush;
         exportToGMSH (points, mesh0Edges, mesh1Edges, gr[0].mainDir);
         //cout << "done!" << endl;        
+
+        cout << "AFT 3" << endl;
         
         //cout << "Advancing front... " << flush;
-        advanceFront (frontList, points, aveTriArea, edges, triangles, triangleADT, pointADT, edgeCenterADT, edgeADT, edge01ADT, newGridId, edgeCenters, circleADT);
+        advanceFront (frontList, points, aveTriArea, edges, triangles, triangleADT, pointADT, edgeCenterADT, edgeADT, edge01ADT, newGridId, edgeCenters, circleADT, countr);
         //cout << "done!" << endl;
+
+        cout << "AFT 4" << endl;
         
         //cout << "Erasing dead elements... " << flush;
         eraseDeadPoints (points, edges, triangles);
         eraseDeadEdges (edges, triangles, points);
         eraseDeadTriangles (triangles, points, edges);
         //cout << "done!" << endl;
+
+        cout << "AFT 5" << endl;
         
         //cout << "Outputing unflipped triangles... " << flush;        
         outputTrianglesVTK (points, triangles, gr[0].mainDir, "tri.vtk");
         //cout << "done!" << endl;        
+
+        cout << "AFT 6" << endl;
         
         //cout << "Flipping triangles... " << flush;
         flip (triangles, edges, points);
         //cout << "done!" << endl;
+
+        cout << "AFT 7" << endl;
         
         //cout << "Flipping triangles... " << flush;
         flip (triangles, edges, points);
         //cout << "done!" << endl;
+
+        cout << "AFT 8" << endl;
         
         //cout << "Outputing flipped triangles... " << flush;    
         outputTrianglesVTK (points, triangles, gr[0].mainDir, "triFlip.vtk");
         //cout << "done!" << endl;
+
+        cout << "AFT 9" << endl;
         
-        //cout << "Creating cells... " << flush;
+        cout << "Creating cells... " << flush;
         createCells (offsetZ, points, newGrid, triangles, phys, newGridId);
-        //cout << "done!" << endl;
+        cout << "done!" << endl;
         
         
         
         
-        //cout << "Outputing new grid... " << flush;
+        cout << "Outputing new grid... " << flush;
         //newGrid.outAllTecplot();
         newGrid.outAllVTK(0);
-        //cout << "done!" << endl;
+        cout << "done!" << endl;
         
-        //cout << "Creating final grid... " << flush;
+        cout << "Creating final grid... " << flush;
         createFinalGrid (finalGrid, gr, newGrid);
-        //cout << "done!" << endl;
+        cout << "done!" << endl;
         
         
         
@@ -139,6 +169,10 @@ namespace AFT
             addToEdgeList (tmpEdge, iA, iCPX, edges, edgeADT, points);
             iA_CPX = edges.size() - 1;
             addToFrontList (iA_CPX, frontList, points, edges);
+                    if (iFrontEdge == 782)
+                    {
+                        assert(iA_CPX != 502);
+                    }
             
             Point cntPoint;
             cntPoint.belonging = newGridId;
@@ -156,6 +190,10 @@ namespace AFT
             addToEdgeList (tmpEdge, iB, iCPX, edges, edgeADT, points);
             iB_CPX = edges.size() - 1;
             addToFrontList (iB_CPX, frontList, points, edges);
+                    if (iFrontEdge == 782)
+                    {
+                        assert(iB_CPX != 502);
+                    }
             
             Point cntPoint;
             cntPoint.belonging = newGridId;
@@ -167,11 +205,17 @@ namespace AFT
             eraseExistingEdgeFromFrontList (iB_CPX, frontList);
         }
         
+            //if (iFrontEdge == 397 && iA_CPX == 399 && iB_CPX == 400)
+            //{
+            //    outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
+            //    assert(false);
+            //}
         Triangle tmpTriangle = createTriangle (iFrontEdge, iA_CPX, iB_CPX, edges, points);
         addToTriangleList (triangles, tmpTriangle, triangleADT, points, circleADT, edges, frontList);
         
         eraseFromFrontList (frontList, iFrontEdge);
         //sortFrontList (frontList, points, edges);
+
     }
     
     void exportToGMSH (const vector<Point>& points, const vector<Edge>& mesh0Edges, const vector<Edge>& mesh1Edges, string dir)
@@ -365,6 +409,7 @@ namespace AFT
         return (h/2.);
     }
     
+    //void Tanemura_Merriam_Helper (int iA, int iB, int& i, vector<Point>& points, deque<int>& pts, vector<double>& diff)
     void Tanemura_Merriam_Helper (int iA, int iB, int& i, vector<Point>& points, deque<int>& pts)
     {
         bool found = false;
@@ -376,7 +421,15 @@ namespace AFT
         Point& B = points[iB];
         
         Point& CPX = points[pts[i]];
-        triPtsCircums (CPX.dim, A.dim, B.dim, center, radius);        
+
+
+
+        if (iA == 277 && iB == 182)
+        {
+            cout << "cnt[0] = " << center[0] << endl;
+            cout << "cnt[1] = " << center[1] << endl;
+            cout << "radius = " << radius << endl;
+        }
                 
         //cout << "iA = " << iA << endl;
         //cout << "iB = " << iB << endl;
@@ -389,10 +442,54 @@ namespace AFT
             //cout << "pts[j] = " << pts[j] << endl;
             if (j != i && pts[j] != -1)
             {
+        if (A.dim[0] == B.dim[0] && A.dim[1] == B.dim[1])
+        {
+            assert(false);
+        }
+        
+        if (A.dim[0] == CPX.dim[0] && A.dim[1] == CPX.dim[1])
+        {
+            assert(false);
+        }
+        
+        if (B.dim[0] == CPX.dim[0] && B.dim[1] == CPX.dim[1])
+        {
+            cout << "iA: " << iA << endl;
+            cout << "iB: " << iB << endl;
+            cout << "pts[j]: " << pts[j] << endl;
+            cout << "A.dim[0]: " << A.dim[0] << endl;
+            cout << "A.dim[1]: " << A.dim[1] << endl;
+            cout << "B.dim[0]: " << B.dim[0] << endl;
+            cout << "B.dim[1]: " << B.dim[1] << endl;
+            cout << "CPX.dim[0]: " << CPX.dim[0] << endl;
+            cout << "CPX.dim[1]: " << CPX.dim[1] << endl;
+            assert(false);
+        }
+                triPtsCircums (CPX.dim, A.dim, B.dim, center, radius);        
                 CVector d = points[pts[j]].dim - center;
 
-                if ( (radius - mag(d)) > 1e-5 )
+                if (iA == 277 && iB == 182)
                 {
+                    cout << "pts[j] = " << pts[j] << endl;
+                    cout << "d[0] = " << d[0] << endl;
+                    cout << "d[1] = " << d[1] << endl;
+                    cout << "pd[0] = " << pow(d[0],2) << endl;
+                    cout << "pd[1] = " << pow(d[1],2) << endl;
+                    cout << "sqrt = " << sqrt(pow(d[0],2) + pow(d[1],2)) << endl;
+                    cout << "mag(d) = " << maggg(d) << endl;
+                    cout << "dif= " << radius - mag(d) << endl;
+                }
+
+                //double dif = radius - mag(d);
+                //diff.push_back(std::abs(dif));
+                if ( radius - mag(d) > 1e-5 )
+                //if ( dif > 1e-5 )
+                {
+                    if (iA == 277 && iB == 182)
+                    {
+                        cout << "pts[j]: " << pts[j] << endl;
+                        cout << "dif: " << radius - mag(d) << endl;
+                    }
                     pts[i] = -1;
                     i = j;
                     //cout << "pts[i] = " << pts[i] << endl;
@@ -411,6 +508,7 @@ namespace AFT
                     
         if ( found )
         {
+            //Tanemura_Merriam_Helper (iA, iB, i, points, pts, diff);
             Tanemura_Merriam_Helper (iA, iB, i, points, pts);
         }
     }
@@ -434,7 +532,16 @@ namespace AFT
             {
                 //cout << "pts[j] = " << pts[j] << endl;
             
-                if (pts[j] == iA || pts[j] == iB)
+                //if (pts[j] == iA || pts[j] == iB)
+                Point& A = points[iA];
+                Point& B = points[iB];
+                Point& CPX = points[pts[j]];
+
+                if (CPX.dim[0] == A.dim[0] && CPX.dim[1] == A.dim[1])
+                {
+                    pts[j] = -1;
+                }
+                if (CPX.dim[0] == B.dim[0] && CPX.dim[1] == B.dim[1])
                 {
                     pts[j] = -1;
                 }
@@ -455,8 +562,21 @@ namespace AFT
                 return -1;
             }
         
+            //vector<double> diff;
+            //Tanemura_Merriam_Helper (iA, iB, i, points, pts, diff);
             Tanemura_Merriam_Helper (iA, iB, i, points, pts);
+
+            //double current_diff = 999999;
+            //for (int d=0; d<diff.size(); ++d)
+            //{
+            //    if (diff[d] < current_diff)
+            //    {
+            //        current_diff = diff[d];
+            //        //i = d;
+            //    }
+            //}
         
+            assert(i != -1);
             return i;
         }
     }

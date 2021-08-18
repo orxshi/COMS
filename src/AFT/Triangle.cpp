@@ -113,6 +113,21 @@ namespace AFT
         
         CVector cnt;
         double radius;
+
+        if (p0[0] == p1[0] && p0[1] == p1[1])
+        {
+            assert(false);
+        }
+        
+        if (p0[0] == p2[0] && p0[1] == p2[1])
+        {
+            assert(false);
+        }
+        
+        if (p1[0] == p2[0] && p1[1] == p2[1])
+        {
+            assert(false);
+        }
         
         triPtsCircums (p0, p1, p2, cnt, radius);
         
@@ -364,6 +379,33 @@ namespace AFT
         else
         {
             tri.p.push_back ( e2t1 );
+        }
+
+        assert(!(points[tri.p[0]].dim[0] == points[tri.p[1]].dim[0] && points[tri.p[0]].dim[1] == points[tri.p[1]].dim[1]));
+        if ((points[tri.p[1]].dim[0] == points[tri.p[2]].dim[0] && points[tri.p[1]].dim[1] == points[tri.p[2]].dim[1]))
+        {
+            cout << "e1: " << e1 << endl;
+            cout << "e2: " << e2 << endl;
+            cout << "e3: " << e3 << endl;
+            cout << "p0: " << e1t0 << endl;
+            cout << "p0: " << e1t1 << endl;
+            cout << "p0: " << e2t0 << endl;
+            cout << "p0: " << e2t1 << endl;
+            assert(!(points[tri.p[1]].dim[0] == points[tri.p[2]].dim[0] && points[tri.p[1]].dim[1] == points[tri.p[2]].dim[1]));
+        }
+        if ((points[tri.p[0]].dim[0] == points[tri.p[2]].dim[0] && points[tri.p[0]].dim[1] == points[tri.p[2]].dim[1]))
+        {
+            cout << "e1: " << e1 << endl;
+            cout << "e2: " << e2 << endl;
+            cout << "e3: " << e3 << endl;
+            //cout << "p0: " << tri.p[0] << endl;
+            //cout << "p1: " << tri.p[1] << endl;
+            //cout << "p2: " << tri.p[2] << endl;
+            cout << "p0: " << e1t0 << endl;
+            cout << "p0: " << e1t1 << endl;
+            cout << "p0: " << e2t0 << endl;
+            cout << "p0: " << e2t1 << endl;
+            assert(!(points[tri.p[0]].dim[0] == points[tri.p[2]].dim[0] && points[tri.p[0]].dim[1] == points[tri.p[2]].dim[1]));
         }
 
         return tri;
@@ -619,6 +661,7 @@ namespace AFT
             const CVector& pd0 = points[ ip0 ].dim;
             const CVector& pd1 = points[ ip1 ].dim;
             const CVector& pd2 = points[ ip2 ].dim;
+
             
             triPtsCircums (pd0, pd1, pd2, center, radius);
             
@@ -1228,6 +1271,21 @@ namespace AFT
     {
         CVector cnt;
         double radius;
+
+        if (p0[0] == p1[0] && p0[1] == p1[1])
+        {
+            assert(false);
+        }
+        
+        if (p0[0] == p2[0] && p0[1] == p2[1])
+        {
+            assert(false);
+        }
+        
+        if (p1[0] == p2[0] && p1[1] == p2[1])
+        {
+            assert(false);
+        }
         
         triPtsCircums (p0, p1, p2, cnt, radius);
         
