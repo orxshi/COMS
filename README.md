@@ -9,3 +9,5 @@ Below is an example shows a background and an overset mesh. Some of the cells in
 ![](https://github.com/orxshi/COMS/blob/master/images/front.gif)
 
 The following figure shows application of COMS to oscillating airfoil test case. At each time step, COMS remeshes the inter-grid region.
+
+![](https://github.com/orxshi/COMS/blob/master/images/osc.gif)
